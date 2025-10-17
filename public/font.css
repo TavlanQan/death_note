@@ -1,0 +1,16 @@
+@font-face {
+    font-family: 'Zhizn';
+    src: url('Zhizn.eot');
+    src: local('Zhizn'),
+        url('Zhizn.eot?#iefix') format('embedded-opentype'),
+        url('Zhizn.woff2') format('woff2'),
+        url('Zhizn.woff') format('woff'),
+        url('Zhizn.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Cloister';
+    src: url('CloisterBlack.ttf');
+}
