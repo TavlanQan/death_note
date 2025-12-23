@@ -1,0 +1,19 @@
+
+> death_note@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.3.5
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.0.103:3001
+
+ ✓ Starting...
+ ✓ Ready in 1785ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 2.1s (654 modules)
+ GET /_next/static/webpack/361f29e76579b0ce.webpack.hot-update.json 500 in 5355ms
+ ○ Compiling /_error ...
+ GET / 500 in 3686ms
+ GET / 500 in 228ms
+ GET /icons/russia-flag.png 500 in 1107ms
+ GET /icons/russia-flag.png 500 in 219ms
+[?25h
