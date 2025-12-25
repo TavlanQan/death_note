@@ -38,7 +38,7 @@ jobs:
         run: |
           CID=$(ipfs \
             --api="/dns4/rpc.filebase.io/tcp/443/https" \
-            --api-auth="$FILEBASE_RPC_KEY" \
+            --api-header="Authorization: Basic $FILEBASE_RPC_KEY" \
             add -r -Q out)
           echo "cid=$CID" >> $GITHUB_OUTPUT
           echo "Deployed CID: $CID"
@@ -50,5 +50,5 @@ jobs:
         run: |
           ipfs \
             --api="/dns4/rpc.filebase.io/tcp/443/https" \
-            --api-auth="$FILEBASE_RPC_KEY" \
+            --api-header="Authorization: Basic $FILEBASE_RPC_KEY" \
             name publish --key=$IPNS_KEY /ipfs/${{ steps.ipfs.outputs.cid }}
