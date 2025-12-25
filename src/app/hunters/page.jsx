@@ -1,23 +1,49 @@
 import Header from "@/components/Header/Header";
+import MenuNav from "@/components/Main/MenuNav";
+import styles from "@/styles/StaticPage.module.css";
 
-const pageStyles = {
-  color: "#fff",
-  padding: "80px 40px",
-  maxWidth: "960px",
-  margin: "0 auto",
-  lineHeight: 1.6,
-};
+const months = [
+  "Январь",
+  "Февраль",
+  "Март",
+  "Апрель",
+  "Май",
+  "Июнь",
+  "Июль",
+  "Август",
+  "Сентябрь",
+  "Октябрь",
+  "Ноябрь",
+  "Декабрь",
+];
 
 export default function HuntersPage() {
   return (
     <>
       <Header />
-      <main style={pageStyles}>
-        <h1>Охотникам</h1>
-        <p>
-          Інструкції та брифінги для тих, хто допомагає у пошуку. Тут з’являться
-          оновлення по задачах та інструментах.
-        </p>
+      <main className={styles.page}>
+        <MenuNav />
+        <div className={styles.container}>
+          <header className={styles.pageHeader}>
+            <h1>Охотникам</h1>
+            <p className={styles.lead}>
+              Для получения награды обратитесь в один из судов.
+            </p>
+          </header>
+          <section className={styles.section}>
+            <div className={styles.inlineRow}>
+              <span className={styles.helperText}>Ссылка для обращения:</span>
+              <a
+                className={styles.helperLink}
+                href="https://example.com/court"
+                target="_blank"
+                rel="noreferrer"
+              >
+                https://example.com/court
+              </a>
+            </div>
+          </section>
+        </div>
       </main>
     </>
   );

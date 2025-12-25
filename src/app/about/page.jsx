@@ -1,23 +1,59 @@
 import Header from "@/components/Header/Header";
-
-const pageStyles = {
-  color: "#fff",
-  padding: "80px 40px",
-  maxWidth: "960px",
-  margin: "0 auto",
-  lineHeight: 1.6,
-};
+import MenuNav from "@/components/Main/MenuNav";
+import styles from "@/styles/StaticPage.module.css";
 
 export default function AboutPage() {
   return (
     <>
       <Header />
-      <main style={pageStyles}>
-        <h1>О проекте</h1>
-        <p>
-          Розділ про місію, команду та джерела даних. Додамо блоки зі статистикою
-          й roadmap, щойно буде контент.
-        </p>
+      <main className={styles.page}>
+        <MenuNav />
+        <div className={styles.container}>
+          <header className={styles.pageHeader}>
+            <h1>О проекте</h1>
+            <p className={styles.lead}>
+              Тетрадь Смерти - реестр судебно признанных убийц, насильников,
+              похитителей - которые скрываются от правосудия и отказываются
+              компенсировать починенный ущерб.
+            </p>
+          </header>
+
+          <section className={styles.section}>
+            <ul className={styles.list}>
+              <li>
+                Любое лицо может оказаться здесь только по решению суда АТС.
+                Любое решение может быть обжаловано в АТС.
+              </li>
+              <li>
+                Лица что оказались в нашем реестре, могут покинуть его в случае
+                начала выплаты компенсации ущерба либо сотрудничестве с
+                организацией которая покроет ущерб за них.
+              </li>
+              <li>
+                Преступники что находятся в реестре, являются опасными для
+                общества и с целью защиты общества и осуществления правосудия,
+                на сайте проводится сбор вознаграждений для лиц что смогут
+                остановить преступников.
+              </li>
+            </ul>
+          </section>
+
+          <section className={styles.section}>
+            <p>
+              Проект управляется Советом Национальной Безопасности Коалиции (
+              <a
+                className={styles.helperLink}
+                href="https://freedomcoalition.net/snb"
+                target="_blank"
+                rel="noreferrer"
+              >
+                freedomcoalition.net/snb
+              </a>
+              ).
+            </p>
+            <p>Разработчики проекта не несут ответственность за его работу.</p>
+          </section>
+        </div>
       </main>
     </>
   );

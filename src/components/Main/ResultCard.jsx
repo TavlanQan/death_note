@@ -1,10 +1,15 @@
 'use client';
 import React from "react";
 import styles from "./Main.module.css";
-import DonationTracker from "../DonationTracker/DonationTracker";
-import MenuNav from "./MenuNav";
 
 function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
+  const location = [card.country, card.city].filter(Boolean).join(", ") || "—";
+  const birthDate = card.birth_date || "—";
+  const phone = card.phones?.[0] || "—";
+  const extraInfo = card.additional_info || (card.labels?.length ? card.labels.join(", ") : "—");
+  const photoSrc = card.photo_url || "/deathlist_photos/1.png";
+  const statusText = card.status || "—";
+
   const handleAppeal = () => {
     if (onAppeal) onAppeal();
   };
@@ -18,46 +23,43 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
   };
 
   return (
-    <>
-      <MenuNav /> 
     <div className={styles.result_block__card}>
-      
       <div className={styles.result_block__card_image_status}>
-        <img src={card.photo} alt={`card-${card.id}`} />
+        <img src={photoSrc} alt={card.full_name || `card-${card.id}`} />
         <p>
           Статус:
           <br />
-          <span>{card.status}</span>
+          <span>{statusText}</span>
         </p>
       </div>
 
       <div className={styles.result_block__card_info}>
         <div className={styles.result_block__card_info_text}>
-          <h2>{card.name}</h2>
+          <h2>{card.full_name}</h2>
           <ul className={styles.info_list}>
             <li>
               <span className={styles.icon}>
                 <img src="/icons/home.svg" alt="" />
               </span>
-              {card.location}
+              {location}
             </li>
             <li>
               <span className={styles.icon}>
                 <img src="/icons/cake.svg" alt="" />
               </span>
-              {card.birth_date}
+              {birthDate}
             </li>
             <li>
               <span className={styles.icon}>
                 <img src="/icons/call.svg" alt="" />
               </span>
-              {card.phone}
+              {phone}
             </li>
             <li>
               <span className={styles.icon}>
                 <img src="/icons/info.svg" alt="" />
               </span>
-              {card.deathlist_reason}
+              {extraInfo}
             </li>
           </ul>
         </div>
@@ -68,13 +70,9 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
           {showVote && (
             <button className={styles.chalk_button} onClick={handleVote}>ПРОГОЛОСОВАТЬ</button>
           )}
-          </div>
-          
-          <DonationTracker initialGoal={10000} />
-          </div>
-          </div>
-          </>
-    
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -1,4 +1,6 @@
+'use client';
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import styles from "./Main.module.css";
 
 const menuItems = [
@@ -9,7 +11,12 @@ const menuItems = [
   { href: "/support", label: "Поддержать" },
 ];
 
-function MenuNav({ currentPath }) {
+function MenuNav() {
+  const rawPath = usePathname();
+  const currentPath = rawPath && rawPath !== "/" && rawPath.endsWith("/")
+    ? rawPath.slice(0, -1)
+    : rawPath;
+
   return (
     <section role="menu-categories" className={styles.menu}>
       <ul className={styles.menu_items}>
@@ -19,7 +26,7 @@ function MenuNav({ currentPath }) {
             <li key={item.href}>
               <Link
                 href={item.href}
-                className={isActive ? "active" : ""}
+                className={`${styles.menu_link} ${isActive ? styles.menu_link_active : ""}`}
                 aria-current={isActive ? "page" : undefined}
               >
                 {item.label}

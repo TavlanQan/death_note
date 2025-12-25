@@ -1,0 +1,54 @@
+name: Deploy Frontend to Filebase IPFS
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build (Next static export)
+        run: npm run build
+
+      - name: Install IPFS CLI
+        run: |
+          curl -L https://dist.ipfs.tech/kubo/v0.30.0/kubo_v0.30.0_linux-amd64.tar.gz -o kubo.tar.gz
+          tar -xzf kubo.tar.gz
+          sudo mv kubo/ipfs /usr/local/bin/ipfs
+          ipfs --version
+
+      - name: Upload to Filebase IPFS
+        id: ipfs
+        env:
+          FILEBASE_RPC_KEY: ${{ secrets.FILEBASE_RPC_KEY }}
+        run: |
+          CID=$(ipfs \
+            --api="/dns4/rpc.filebase.io/tcp/443/https" \
+            --api-auth="$FILEBASE_RPC_KEY" \
+            add -r -Q out)
+          echo "cid=$CID" >> $GITHUB_OUTPUT
+          echo "Deployed CID: $CID"
+
+      - name: Update IPNS
+        env:
+          FILEBASE_RPC_KEY: ${{ secrets.FILEBASE_RPC_KEY }}
+          IPNS_KEY: ${{ secrets.FILEBASE_IPNS_KEY }}
+        run: |
+          ipfs \
+            --api="/dns4/rpc.filebase.io/tcp/443/https" \
+            --api-auth="$FILEBASE_RPC_KEY" \
+            name publish --key=$IPNS_KEY /ipfs/${{ steps.ipfs.outputs.cid }}

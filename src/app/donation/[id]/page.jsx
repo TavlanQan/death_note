@@ -3,16 +3,17 @@ import DonationTracker from "@/components/DonationTracker/DonationTracker";
 import ResultCard from "@/components/Main/ResultCard";
 import cards from "@/../public/cards.json";
 import { notFound } from "next/navigation";
+import styles from "@/styles/StaticPage.module.css";
 
-const layoutStyles = {
-  color: "#fff",
-  padding: "60px 24px",
-  maxWidth: "1200px",
-  margin: "0 auto",
-  display: "flex",
-  flexDirection: "column",
-  gap: "32px",
-};
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return cards
+    .filter((item) => item.id !== undefined && item.id !== null)
+    .map((item) => ({
+      id: String(item.id),
+    }));
+}
 
 export default async function DonationPage({ params }) {
   const { id } = await params;
@@ -24,14 +25,10 @@ export default async function DonationPage({ params }) {
   return (
     <>
       <Header />
-      <main style={layoutStyles}>
-
-        <div>
-          
-          <ResultCard
-            card={card}
-            showVote={false}
-          />
+      <main className={styles.page}>
+        <div className={styles.container}>
+          {/* <DonationTracker initialGoal={10000} /> */}
+          <ResultCard card={card} showVote={false} />
         </div>
       </main>
     </>

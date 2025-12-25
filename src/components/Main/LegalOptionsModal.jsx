@@ -28,7 +28,7 @@ function LegalOptionsModal({ open, onClose, options = [], actionLabel }) {
               </div>
               <div className={styles.modal_card__action}>
                 <a href={option.link} target="_blank" rel="noreferrer" className={styles.modal_select_btn}>
-                  Select
+                  Выбрать
                 </a>
               </div>
             </div>

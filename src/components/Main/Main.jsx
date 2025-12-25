@@ -1,24 +1,32 @@
 'use client';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import styles from "./Main.module.css";
-import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import ResultCard from "./ResultCard";
 import LegalOptionsModal from "./LegalOptionsModal";
 import MenuNav from "./MenuNav";
 
 function Main() {
-  const pathname = usePathname();
   const router = useRouter();
   const [cards, setCards] = useState([]);
   const [legalOptions, setLegalOptions] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalLabel, setModalLabel] = useState("");
+  const [search, setSearch] = useState({
+    lastName: "",
+    firstName: "",
+    patronymic: "",
+    address: "",
+    phone: "",
+  });
 
   useEffect(() => {
     fetch("/cards.json")
       .then(res => res.json())
-      .then(data => setCards(data))
+      .then(data => setCards(data.map((item, index) => ({
+        id: item.id ?? index + 1,
+        ...item,
+      }))))
       .catch(err => console.error("Помилка завантаження cards.json", err));
 
     fetch("/legalOptions.json")
@@ -35,8 +43,41 @@ function Main() {
   const closeModal = () => setModalOpen(false);
 
   const handleVote = (id) => {
-    router.push(`/donation/${id}`);
+    router.push(`/support`);
   };
+
+  const handleSearchChange = (key) => (event) => {
+    setSearch(prev => ({ ...prev, [key]: event.target.value }));
+  };
+
+  const normalize = (value) => (value || "").toString().toLowerCase().trim();
+
+  const normalizedSearch = useMemo(() => ({
+    lastName: normalize(search.lastName),
+    firstName: normalize(search.firstName),
+    patronymic: normalize(search.patronymic),
+    address: normalize(search.address),
+    phone: normalize(search.phone),
+  }), [search]);
+
+  const hasFilters = Object.values(normalizedSearch).some(Boolean);
+
+  const filteredCards = useMemo(() => {
+    if (!cards.length) return [];
+    return cards.filter(card => {
+      const fullName = normalize(card.full_name);
+      const location = normalize([card.country, card.city, card.country_code].filter(Boolean).join(" "));
+      const phone = normalize((card.phones || []).join(" "));
+
+      if (normalizedSearch.lastName && !fullName.includes(normalizedSearch.lastName)) return false;
+      if (normalizedSearch.firstName && !fullName.includes(normalizedSearch.firstName)) return false;
+      if (normalizedSearch.patronymic && !fullName.includes(normalizedSearch.patronymic)) return false;
+      if (normalizedSearch.address && !location.includes(normalizedSearch.address)) return false;
+      if (normalizedSearch.phone && !phone.includes(normalizedSearch.phone)) return false;
+
+      return true;
+    });
+  }, [cards, normalizedSearch]);
 
   return (
     <>
@@ -52,19 +93,39 @@ function Main() {
           {/* Використання нового reusable компонента */}
           {/* <DonationTracker initialGoal={10000} /> */}
 
-          <MenuNav currentPath={pathname} />
+          <MenuNav />
 
           <section role="blacklist-information" className={styles.blacklist_root}>
              {/* ... тут без змін, блок пошуку та карток ... */}
               <article className={styles.search_block}>
                 {/* код форми пошуку... */}
                 <div className={styles.search_block__form}>
-                  <form className={styles.form}>
+                  <form className={styles.form} onSubmit={(event) => event.preventDefault()}>
                     <h3>РАСШИРЕННЫЙ ПОИСК</h3>
-                    <input type="text" placeholder="Фамилия" />
-                    <input type="text" placeholder="Имя" />
-                    <input type="text" placeholder="Отчество" />
-                    <input type="text" placeholder="Адрес" />
+                    <input
+                      type="text"
+                      placeholder="Фамилия"
+                      value={search.lastName}
+                      onChange={handleSearchChange("lastName")}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Имя"
+                      value={search.firstName}
+                      onChange={handleSearchChange("firstName")}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Отчество"
+                      value={search.patronymic}
+                      onChange={handleSearchChange("patronymic")}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Адрес"
+                      value={search.address}
+                      onChange={handleSearchChange("address")}
+                    />
 
                     <div className={styles.phone_split}>
                       <div className={styles.country_code}>
@@ -76,6 +137,8 @@ function Main() {
                         type="text"
                         placeholder="Телефон"
                         className={styles.phone_number_input}
+                        value={search.phone}
+                        onChange={handleSearchChange("phone")}
                       />
                     </div>
 
@@ -91,10 +154,10 @@ function Main() {
 
 
             <article className={styles.result_block}>
-                {cards.length === 0 ? (
-                  <p>Список пока что пуст</p>
+                {filteredCards.length === 0 ? (
+                  <p>{hasFilters ? "Ничего не найдено" : "Список пока что пуст"}</p>
                 ) : (
-                  cards.map(card => (
+                  filteredCards.map(card => (
                     <ResultCard
                       key={card.id}
                       card={card}

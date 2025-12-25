@@ -1,25 +1,443 @@
 [
   {
     "id": 1,
-    "name": "Ковальчук Андрей Тимофеевич",
-    "location": "Московия, Г. Москва",
-    "birth_date": "06.04.1973",
-    "phone": "+79250328763",
-    "deathlist_reason": "Пособник российско-фашистских захватчиков и террористов.",
-    "status": "нейтрализован",
-    "photo": "/deathlist_photos/1.png"
+    "full_name": "Абрамов В.А.",
+    "birth_date": null,
+    "country": "Chuvashia - Volzhskaya Bulgaria",
+    "country_code": "CVB",
+    "city": "Cheboksary",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": "сотрудник ЦПЭ",
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9608.pdf"
+    ],
+    "labels": ["kidnapper"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 700000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": []
   },
-  
   {
     "id": 2,
-    "name": "Ковальчук Андрей Тимофеевич",
-    "location": "Московия, Г. Москва",
-    "birth_date": "06.04.1973",
-    "phone": "+79250328763",
-    "deathlist_reason": "Пособник российско-фашистских захватчиков и террористов.",
-    "status": "нейтрализован",
-    "photo": "/deathlist_photos/1.png"
+    "full_name": "Администрация Президента Российской Федерации",
+    "birth_date": null,
+    "country": "Russia",
+    "country_code": "RUS",
+    "city": "Moscow",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": null,
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9608.pdf"
+    ],
+    "labels": ["kidnapper"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 25000000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": ["Administration of President"]
+  },
+  {
+    "id": 3,
+    "full_name": "Блясина Наталия Владимировна",
+    "birth_date": null,
+    "country": "Chuvashia - Volzhskaya Bulgaria",
+    "country_code": "CVB",
+    "city": "Cheboksary",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": "судья, подписавшая приговор способствовавшая легитимизации похищения",
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9608.pdf"
+    ],
+    "labels": ["kidnapper"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 5000000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": []
+  },
+  {
+    "id": 4,
+    "full_name": "Бурдинский Евгений Владимирович",
+    "birth_date": null,
+    "country": "Chuvashia - Volzhskaya Bulgaria",
+    "country_code": "CVB",
+    "city": "Kugesi",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": null,
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9605.pdf",
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9606.pdf"
+    ],
+    "labels": ["kidnapper", "murderer"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 310000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": ["Ministry of Defense"]
+  },
+  {
+    "id": 5,
+    "full_name": "Васильев Павел Александрович",
+    "birth_date": null,
+    "country": "Lapland",
+    "country_code": "LAP",
+    "city": "Murmansk",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": null,
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9602.pdf"
+    ],
+    "labels": ["kidnapper", "assailant", "burglar"],
+    "debt_amount": [
+      { "currency": "USD", "amount": 3503000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": ["FSB"]
+  },
+  {
+    "id": 6,
+    "full_name": "Гавриловец Игорь Леонидович",
+    "birth_date": null,
+    "country": "Ingria",
+    "country_code": "ING",
+    "city": "Saint Petersburg",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": null,
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9606.pdf"
+    ],
+    "labels": ["kidnapper", "murderer"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 25000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": ["Voenkomaty"]
+  },
+  {
+    "id": 7,
+    "full_name": "Герасимов Валерий Васильевич",
+    "birth_date": "1955-09-08",
+    "country": "Russia",
+    "country_code": "RUS",
+    "city": "Moscow",
+    "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Valery_Gerasimov_and_Timur_Ivanov_(2018-02-26).jpg",
+    "identity_documents": null,
+    "additional_info": null,
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9605.pdf",
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9606.pdf"
+    ],
+    "labels": ["kidnapper", "murderer"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 375000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": ["Ministry of Defense"]
+  },
+  {
+    "id": 8,
+    "full_name": "Забродин С.Л.",
+    "birth_date": null,
+    "country": "Chuvashia - Volzhskaya Bulgaria",
+    "country_code": "CVB",
+    "city": "Cheboksary",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": "лже-свидетель способствовавший похищению",
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9608.pdf"
+    ],
+    "labels": ["kidnapper"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 700000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": []
+  },
+  {
+    "id": 9,
+    "full_name": "Медведев Александр Михайлович",
+    "birth_date": null,
+    "country": "Lapland",
+    "country_code": "LAP",
+    "city": "Murmansk",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": null,
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9602.pdf"
+    ],
+    "labels": ["kidnapper", "assailant", "burglar"],
+    "debt_amount": [
+      { "currency": "USD", "amount": 750000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": ["FSB"]
+  },
+  {
+    "id": 10,
+    "full_name": "Михайлов Юрий Петрович",
+    "birth_date": null,
+    "country": "Chuvashia - Volzhskaya Bulgaria",
+    "country_code": "CVB",
+    "city": "Cheboksary",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": "прокурор способствовавший похищению",
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9608.pdf"
+    ],
+    "labels": ["kidnapper"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 4000000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": []
+  },
+  {
+    "id": 11,
+    "full_name": "Мухин Алексей Валерьевич",
+    "birth_date": null,
+    "country": "Chuvashia - Volzhskaya Bulgaria",
+    "country_code": "CVB",
+    "city": "Cheboksary",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": "начальник следственного отдела УФСБ",
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9608.pdf"
+    ],
+    "labels": ["kidnapper"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 6000000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": ["FSB"]
+  },
+  {
+    "id": 12,
+    "full_name": "Путин Владимир Владимирович",
+    "birth_date": "1952-10-07",
+    "country": "Russia",
+    "country_code": "RUS",
+    "city": "Moscow",
+    "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Vladimir%20Putin%202021.jpg",
+    "identity_documents": null,
+    "additional_info": null,
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9605.pdf",
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9606.pdf"
+    ],
+    "labels": ["kidnapper", "murderer"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 1000000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": ["Administration of President"]
+  },
+  {
+    "id": 13,
+    "full_name": "Софронов Сергей Алексеевич",
+    "birth_date": null,
+    "country": "Chuvashia - Volzhskaya Bulgaria",
+    "country_code": "CVB",
+    "city": "Cheboksary",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": "организатор ареста",
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9608.pdf"
+    ],
+    "labels": ["kidnapper"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 9000000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": ["FSB"]
+  },
+  {
+    "id": 14,
+    "full_name": "Сумзина А.В.",
+    "birth_date": null,
+    "country": "Chuvashia - Volzhskaya Bulgaria",
+    "country_code": "CVB",
+    "city": "Cheboksary",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": "лже-свидетель способствовавший похищению",
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9608.pdf"
+    ],
+    "labels": ["kidnapper"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 700000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": []
+  },
+  {
+    "id": 15,
+    "full_name": "Урмансов Марат Наилевич",
+    "birth_date": null,
+    "country": "Ingria",
+    "country_code": "ING",
+    "city": "Saint Petersburg",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": null,
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9606.pdf"
+    ],
+    "labels": ["kidnapper", "murderer"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 40000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": ["Voenkomaty"]
+  },
+  {
+    "id": 16,
+    "full_name": "Федеральная служба безопасности Российской Федерации (ФСБ России)",
+    "birth_date": null,
+    "country": "Russia",
+    "country_code": "RUS",
+    "city": "Moscow",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": null,
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9608.pdf"
+    ],
+    "labels": ["kidnapper"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 60000000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": ["FSB"]
+  },
+  {
+    "id": 17,
+    "full_name": "Холиков Бахтиёр Махмаджонович",
+    "birth_date": "1974-08-25",
+    "country": "Chuvashia - Volzhskaya Bulgaria",
+    "country_code": "CVB",
+    "city": "Cheboksary",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": null,
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9605.pdf"
+    ],
+    "labels": ["kidnapper", "murderer"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 150000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": ["Voenkomaty"]
+  },
+  {
+    "id": 18,
+    "full_name": "Чулков Е.С.",
+    "birth_date": null,
+    "country": "Chuvashia - Volzhskaya Bulgaria",
+    "country_code": "CVB",
+    "city": "Cheboksary",
+    "photo_url": null,
+    "identity_documents": null,
+    "additional_info": "сотрудник ЦПЭ",
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9608.pdf"
+    ],
+    "labels": ["kidnapper"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 700000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": []
+  },
+  {
+    "id": 19,
+    "full_name": "Шойгу Сергей Кужугетович",
+    "birth_date": "1955-05-21",
+    "country": "Russia",
+    "country_code": "RUS",
+    "city": "Moscow",
+    "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/%D0%A1%D0%B5%D1%80%D0%B3%D0%B5%D0%B9%20%D0%A8%D0%BE%D0%B9%D0%B3%D1%83%2022.08.2021.jpg",
+    "identity_documents": null,
+    "additional_info": null,
+    "social_networks": [],
+    "phones": [],
+    "court_decisions": [
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9605.pdf",
+      "https://github.com/court-kebe/docs/blob/main/%D0%A7%D0%B0%D1%81%D1%82%D0%BD%D1%8B%D0%B9%20%D1%81%D1%83%D0%B4%20_%D0%9A%D0%B5%D0%B1%D0%B5_%2C%20%D0%B4%D0%B5%D0%BB%D0%BE%20%E2%84%9606.pdf"
+    ],
+    "labels": ["kidnapper", "murderer"],
+    "debt_amount": [
+      { "currency": "BLC", "amount": 600000000 }
+    ],
+    "status": "outlaw",
+    "special_marks": null,
+    "criminal_organizations": ["Ministry of Defense"]
   }
-  
-
 ]

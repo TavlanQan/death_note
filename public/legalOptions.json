@@ -1,32 +1,32 @@
 [
   {
     "id": "court-appeal",
-    "title": "Апеляційний суд",
-    "description": "Подати апеляцію на рішення, отримати консультацію юриста.",
+    "title": "Апелляционный суд",
+    "description": "Подать апелляцию на решение, получить консультацию юриста.",
     "amount": "4 500₴",
     "image": "/icons/home.svg",
     "link": "https://example.com/appeal"
   },
   {
     "id": "claim-online",
-    "title": "Онлайн-позов",
-    "description": "Швидке формування позову через онлайн-сервіс.",
+    "title": "Онлайн-иск",
+    "description": "Быстрое формирование иска через онлайн-сервис.",
     "amount": "3 200₴",
     "image": "/icons/call.svg",
     "link": "https://example.com/online-claim"
   },
   {
     "id": "legal-aid",
-    "title": "Юридична допомога",
-    "description": "Пакет документів та супровід адвоката до суду.",
+    "title": "Юридическая помощь",
+    "description": "Пакет документов и сопровождение адвоката в суде.",
     "amount": "6 700₴",
     "image": "/icons/info.svg",
     "link": "https://example.com/legal-aid"
   },
   {
     "id": "regional-court",
-    "title": "Регіональний суд",
-    "description": "Безпосереднє подання позову у вашому регіоні.",
+    "title": "Региональный суд",
+    "description": "Подача иска в вашем регионе.",
     "amount": "5 000₴",
     "image": "/icons/cake.svg",
     "link": "https://example.com/regional-court"

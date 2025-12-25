@@ -1,19 +1,11 @@
 // components/DonationTracker.jsx
 'use client';
-import { useState, useEffect } from "react";
+import { DONATION_CURRENT, DONATION_GOAL } from "@/constants/donation";
 import styles from "./Donation.module.css";
 
 export default function DonationTracker({ initialGoal = 10000 }) {
-  const [donationAmount, setDonationAmount] = useState(0);
-  const goalAmount = initialGoal;
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDonationAmount((prev) => Math.min(prev + 100, goalAmount));
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [goalAmount]);
+  const goalAmount = initialGoal ?? DONATION_GOAL;
+  const donationAmount = Math.min(DONATION_CURRENT, goalAmount);
 
   // Розрахунок відсотка для прогрес-бару
   const percentage = Math.min((donationAmount / goalAmount) * 100, 100);
@@ -39,7 +31,7 @@ export default function DonationTracker({ initialGoal = 10000 }) {
       </div>
 
       <div className={styles.donation_button}>
-        <a href="/donation">
+        <a href="/support">
           <img role="donate" src="/DONATE.png" alt="Donate button" />
         </a>
       </div>
