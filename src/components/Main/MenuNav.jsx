@@ -5,9 +5,11 @@ import styles from "./Main.module.css";
 
 const menuItems = [
   { href: "/", label: "Розыск" },
+  { href: "/about", label: "О проекте" },
   { href: "/hunters", label: "Охотникам" },
   { href: "/claim", label: "Подать иск" },
-  { href: "/about", label: "О проекте" },
+  { href: "/reab", label: "Выйти из реестра" },
+  
   { href: "/support", label: "Поддержать" },
 ];
 

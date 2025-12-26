@@ -21,18 +21,18 @@ function Main() {
   });
 
   useEffect(() => {
-    fetch("/cards.json")
+    fetch("https://raw.githubusercontent.com/court-kebe/docs/refs/heads/main/export.json")
       .then(res => res.json())
       .then(data => setCards(data.map((item, index) => ({
         id: item.id ?? index + 1,
         ...item,
       }))))
-      .catch(err => console.error("Помилка завантаження cards.json", err));
+      .catch(err => console.error("Ошибка загрузки cards.json", err));
 
     fetch("/legalOptions.json")
       .then(res => res.json())
       .then(data => setLegalOptions(data))
-      .catch(err => console.error("Помилка завантаження legalOptions.json", err));
+      .catch(err => console.error("Ошибка загрузки legalOptions.json", err));
   }, []);
 
   const openModal = (label) => {
@@ -122,16 +122,15 @@ function Main() {
                     />
                     <input
                       type="text"
-                      placeholder="Адрес"
+                      placeholder="Город / Адрес"
                       value={search.address}
                       onChange={handleSearchChange("address")}
                     />
 
                     <div className={styles.phone_split}>
                       <div className={styles.country_code}>
-                        <img src="/icons/russia-flag.png" alt="RU" />
-                        <span>+7</span>
-                        <div className={styles.dropdown_icon}>▼</div>
+                         
+                        <span>+7</span> 
                       </div>
                       <input
                         type="text"

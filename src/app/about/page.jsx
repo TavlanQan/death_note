@@ -21,8 +21,16 @@ export default function AboutPage() {
           <section className={styles.section}>
             <ul className={styles.list}>
               <li>
-                Любое лицо может оказаться здесь только по решению суда АТС.
-                Любое решение может быть обжаловано в АТС.
+                Любое лицо может оказаться здесь только по решению суда  <a
+                                className={styles.helperLink}
+                                href="hhttps://t.me/court_aac_ru"
+                                target="_blank"
+                                rel="noreferrer" >АТС</a>.
+                Любое решение может быть обжаловано в <a
+                                className={styles.helperLink}
+                                href="hhttps://t.me/court_aac_ru"
+                                target="_blank"
+                                rel="noreferrer" >АТС</a>.
               </li>
               <li>
                 Лица что оказались в нашем реестре, могут покинуть его в случае
@@ -40,16 +48,15 @@ export default function AboutPage() {
 
           <section className={styles.section}>
             <p>
-              Проект управляется Советом Национальной Безопасности Коалиции (
-              <a
+              Проект управляется               <a
                 className={styles.helperLink}
                 href="https://freedomcoalition.net/snb"
                 target="_blank"
                 rel="noreferrer"
               >
-                freedomcoalition.net/snb
+               Советом Национальной Безопасности Коалиции 
               </a>
-              ).
+              .
             </p>
             <p>Разработчики проекта не несут ответственность за его работу.</p>
           </section>

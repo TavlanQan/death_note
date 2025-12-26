@@ -10,38 +10,20 @@ export default function ClaimPage() {
         <MenuNav />
         <div className={styles.container}>
           <header className={styles.pageHeader}>
-            <h1>Реабилитация</h1>
-            <p className={styles.lead}>
-              Если вы оказались в списке, но считаете что можете исправить свою
-              вину, вы можете связаться с Коалицией и договориться о сотрудничестве.
-            </p>
+            <h1>Подача Иска</h1> 
           </header>
 
           <section className={styles.section}>
             <p>
-              Взамен Коалиция займется компенсацией вашего ущерба и внесет вас
-              в «Тетрадь Жизни», что гарантирует скрытие вашей личности с нашего
-              сайта.
-            </p>
-            <div className={styles.inlineRow}>
-              <span className={styles.helperText}>Коалиция:</span>
-              <a
+               Иск подается через <a
                 className={styles.helperLink}
-                href="https://freedomcoalition.net"
+                href="hhttps://t.me/court_aac_ru"
                 target="_blank"
-                rel="noreferrer"
-              >
-                freedomcoalition.net
-              </a>
-            </div>
-          </section>
-
-          <section className={styles.notice}>
-            <p>
-              Мы ценим жизнь каждого и надеемся что Вы тоже захотите спасать
-              жизни вместе с нами.
+                rel="noreferrer" >Ассоциацию Третейских Судов</a>, мы полностью признаем их решения.
             </p>
+             
           </section>
+ 
         </div>
       </main>
     </>

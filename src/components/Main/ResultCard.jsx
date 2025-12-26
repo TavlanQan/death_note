@@ -6,9 +6,9 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
   const location = [card.country, card.city].filter(Boolean).join(", ") || "—";
   const birthDate = card.birth_date || "—";
   const phone = card.phones?.[0] || "—";
-  const extraInfo = card.additional_info || (card.labels?.length ? card.labels.join(", ") : "—");
+  const extraInfo = card.additional_info + (card.labels?.length ? card.labels.join(", ") : "");
   const photoSrc = card.photo_url || "/deathlist_photos/1.png";
-  const statusText = card.status || "—";
+  const statusText = card.status   || "—";
 
   const handleAppeal = () => {
     if (onAppeal) onAppeal();

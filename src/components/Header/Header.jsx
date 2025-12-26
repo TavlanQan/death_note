@@ -17,7 +17,7 @@ function Header() {
         </a>
       </div>
       <div className={styles.donations}>
-        <DonationTracker initialGoal={10000} />
+        <DonationTracker initialGoal={12000} />
       </div>
 
     </header>

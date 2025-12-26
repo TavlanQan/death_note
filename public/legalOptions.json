@@ -1,34 +1,18 @@
 [
   {
-    "id": "court-appeal",
-    "title": "Апелляционный суд",
-    "description": "Подать апелляцию на решение, получить консультацию юриста.",
-    "amount": "4 500₴",
-    "image": "/icons/home.svg",
-    "link": "https://example.com/appeal"
-  },
+    "id": "court_kebe_private",
+    "title": "Частный Суд Кебе",
+    "description": "Дела любых типов.",
+    "amount": "725$",
+    "image": "https://github.com/court-kebe/docs/blob/main/logo.jpg?raw=true",
+    "link": "https://t.me/kebe_court_private"
+  }, 
   {
-    "id": "claim-online",
-    "title": "Онлайн-иск",
-    "description": "Быстрое формирование иска через онлайн-сервис.",
-    "amount": "3 200₴",
-    "image": "/icons/call.svg",
-    "link": "https://example.com/online-claim"
-  },
-  {
-    "id": "legal-aid",
-    "title": "Юридическая помощь",
-    "description": "Пакет документов и сопровождение адвоката в суде.",
-    "amount": "6 700₴",
-    "image": "/icons/info.svg",
-    "link": "https://example.com/legal-aid"
-  },
-  {
-    "id": "regional-court",
-    "title": "Региональный суд",
-    "description": "Подача иска в вашем регионе.",
-    "amount": "5 000₴",
-    "image": "/icons/cake.svg",
-    "link": "https://example.com/regional-court"
+    "id": "chas_sud_ting",
+    "title": "Частный Суд Тинг",
+    "description": "Дела любых типов.",
+    "amount": "0$",
+    "image": null,
+    "link": "https://t.me/chas_sud_ting"
   }
 ]

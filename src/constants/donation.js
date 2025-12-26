@@ -1,2 +1,2 @@
-export const DONATION_GOAL = 10000;
-export const DONATION_CURRENT = 2750;
+export const DONATION_GOAL = 12000;
+export const DONATION_CURRENT = 0;
