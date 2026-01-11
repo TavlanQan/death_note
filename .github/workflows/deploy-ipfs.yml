@@ -1,62 +1,68 @@
-name: Deploy Frontend to Filebase IPFS
+steps:
+  - name: Checkout repo
+    uses: actions/checkout@v4
 
-on:
-  push:
-    branches: [ "main" ]
+  - name: Setup Node
+    uses: actions/setup-node@v4
+    with:
+      node-version: 20
+      cache: "npm"
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  - name: Install deps
+    run: npm ci
 
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+  - name: Build (Next static export)
+    run: npm run build
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "npm"
+  - name: Install IPFS CLI
+    run: |
+      set -euo pipefail
 
-      - name: Install deps
-        run: npm ci
+      # Зафиксируйте версию (при необходимости поменяйте)
+      IPFS_VERSION=${IPFS_VERSION:-v0.30.0}
 
-      - name: Build (Next static export)
-        run: npm run build
+      # Определяем архитектуру runner'а
+      arch=$(uname -m)
+      case "$arch" in
+        x86_64) ARCH="linux-amd64" ;;
+        aarch64|arm64) ARCH="linux-arm64" ;;
+        *) echo "Unsupported architecture: $arch"; exit 1 ;;
+      esac
 
-      - name: Install IPFS CLI
-        run: |
-          # Устанавливаем конкретную стабильную версию
-          VERSION="v0.30.0"
-          echo "Устанавливаем IPFS версии $VERSION"
-          # Скачиваем
-          curl -sL "https://dist.ipfs.io/go-ipfs/${VERSION}/go-ipfs_${VERSION#v}_linux-amd64.tar.gz" -o kubo.tar.gz
-          # Проверяем, что скачался именно gzip-архив
-          file kubo.tar.gz | grep -q "gzip compressed data" || (echo "ОШИБКА: Файл не является архивом!" && exit 1)
-          # Распаковываем и устанавливаем
-          tar -xzf kubo.tar.gz
-          sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
-          ipfs --version
-          echo "Установка завершена успешно"
+      FNAME="go-ipfs_${IPFS_VERSION#v}_${ARCH}.tar.gz"
+      URL="https://dist.ipfs.io/go-ipfs/${IPFS_VERSION}/${FNAME}"
 
-      - name: Upload to Filebase IPFS
-        id: ipfs
-        env:
-          FILEBASE_RPC_KEY: ${{ secrets.FILEBASE_RPC_KEY }}
-        run: |
-          CID=$(ipfs \
-            --api="/dns4/rpc.filebase.io/tcp/443/https" \
-            --api-auth="$FILEBASE_RPC_KEY" \
-            add -r -Q out)
-          echo "cid=$CID" >> $GITHUB_OUTPUT
-          echo "Deployed CID: $CID"
+      echo "Downloading $URL"
+      # -f чтобы падать при HTTP ошибках, -S показать ошибки, -L следовать редиректам
+      curl -fSL "$URL" -o "/tmp/$FNAME"
 
-      - name: Update IPNS
-        env:
-          FILEBASE_RPC_KEY: ${{ secrets.FILEBASE_RPC_KEY }}
-          IPNS_KEY: ${{ secrets.FILEBASE_IPNS_KEY }}
-        run: |
-          ipfs \
-            --api="/dns4/rpc.filebase.io/tcp/443/https" \
-            --api-auth="$FILEBASE_RPC_KEY" \
-            name publish --key=$IPNS_KEY /ipfs/${{ steps.ipfs.outputs.cid }}
+      echo "Verifying tarball"
+      # tar -tzf выйдет с ош��бкой, если файл не валидный gzip tar
+      tar -tzf "/tmp/$FNAME" > /dev/null
+
+      echo "Extracting and installing ipfs"
+      tar -xzf "/tmp/$FNAME" -C /tmp
+      sudo mv /tmp/go-ipfs/*/ipfs /usr/local/bin/
+      ipfs --version
+
+  - name: Upload to Filebase IPFS
+    id: ipfs
+    env:
+      FILEBASE_RPC_KEY: ${{ secrets.FILEBASE_RPC_KEY }}
+    run: |
+      CID=$(ipfs \
+        --api="/dns4/rpc.filebase.io/tcp/443/https" \
+        --api-auth="$FILEBASE_RPC_KEY" \
+        add -r -Q out)
+      echo "cid=$CID" >> $GITHUB_OUTPUT
+      echo "Deployed CID: $CID"
+
+  - name: Update IPNS
+    env:
+      FILEBASE_RPC_KEY: ${{ secrets.FILEBASE_RPC_KEY }}
+      IPNS_KEY: ${{ secrets.FILEBASE_IPNS_KEY }}
+    run: |
+      ipfs \
+        --api="/dns4/rpc.filebase.io/tcp/443/https" \
+        --api-auth="$FILEBASE_RPC_KEY" \
+        name publish --key=$IPNS_KEY /ipfs/${{ steps.ipfs.outputs.cid }}
