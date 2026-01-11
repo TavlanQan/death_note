@@ -26,10 +26,18 @@ jobs:
 
       - name: Install IPFS CLI
         run: |
-          wget -q https://raw.githubusercontent.com/ipfs/kubo/master/install.sh
-          chmod +x install.sh
-          sudo ./install.sh
+          # Устанавливаем конкретную стабильную версию
+          VERSION="v0.30.0"
+          echo "Устанавливаем IPFS версии $VERSION"
+          # Скачиваем
+          curl -sL "https://dist.ipfs.io/go-ipfs/${VERSION}/go-ipfs_${VERSION#v}_linux-amd64.tar.gz" -o kubo.tar.gz
+          # Проверяем, что скачался именно gzip-архив
+          file kubo.tar.gz | grep -q "gzip compressed data" || (echo "ОШИБКА: Файл не является архивом!" && exit 1)
+          # Распаковываем и устанавливаем
+          tar -xzf kubo.tar.gz
+          sudo mv go-ipfs/ipfs /usr/local/bin/ipfs
           ipfs --version
+          echo "Установка завершена успешно"
 
       - name: Upload to Filebase IPFS
         id: ipfs
