@@ -26,9 +26,9 @@ jobs:
 
       - name: Install IPFS CLI
         run: |
-          curl -L https://dist.ipfs.tech/kubo/latest/kubo_latest_linux-amd64.tar.gz -o kubo.tar.gz
-          tar -xzf kubo.tar.gz
-          sudo mv kubo/ipfs /usr/local/bin/ipfs
+          wget -q https://raw.githubusercontent.com/ipfs/kubo/master/install.sh
+          chmod +x install.sh
+          sudo ./install.sh
           ipfs --version
 
       - name: Upload to Filebase IPFS
