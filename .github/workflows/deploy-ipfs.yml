@@ -18,7 +18,7 @@ steps:
     run: |
       set -euo pipefail
 
-      # Зафиксируйте версию (при необходимости поменяйте)
+      # Зафиксируйте версию (��ри необходимости поменяйте)
       IPFS_VERSION=${IPFS_VERSION:-v0.30.0}
 
       # Определяем архитектуру runner'а
@@ -37,7 +37,7 @@ steps:
       curl -fSL "$URL" -o "/tmp/$FNAME"
 
       echo "Verifying tarball"
-      # tar -tzf выйдет с ош��бкой, если файл не валидный gzip tar
+      # tar -tzf выйдет с ошибкой, если файл не валидный gzip tar
       tar -tzf "/tmp/$FNAME" > /dev/null
 
       echo "Extracting and installing ipfs"
