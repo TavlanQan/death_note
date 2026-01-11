@@ -25,11 +25,11 @@ jobs:
         run: npm run build
 
       - name: Install IPFS CLI
-  run: |
-    curl -L https://dist.ipfs.tech/kubo/latest/kubo_latest_linux-amd64.tar.gz -o kubo.tar.gz
-    tar -xzf kubo.tar.gz
-    sudo mv kubo/ipfs /usr/local/bin/ipfs
-    ipfs --version
+        run: |
+          curl -L https://dist.ipfs.tech/kubo/latest/kubo_latest_linux-amd64.tar.gz -o kubo.tar.gz
+          tar -xzf kubo.tar.gz
+          sudo mv kubo/ipfs /usr/local/bin/ipfs
+          ipfs --version
 
       - name: Upload to Filebase IPFS
         id: ipfs
@@ -52,4 +52,3 @@ jobs:
             --api="/dns4/rpc.filebase.io/tcp/443/https" \
             --api-auth="$FILEBASE_RPC_KEY" \
             name publish --key=$IPNS_KEY /ipfs/${{ steps.ipfs.outputs.cid }}
-
