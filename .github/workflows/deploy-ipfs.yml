@@ -1,68 +1,78 @@
-steps:
-  - name: Checkout repo
-    uses: actions/checkout@v4
+name: Deploy Frontend to Filebase IPFS
 
-  - name: Setup Node
-    uses: actions/setup-node@v4
-    with:
-      node-version: 20
-      cache: "npm"
+on:
+  push:
+    branches: ["main"]
 
-  - name: Install deps
-    run: npm ci
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-  - name: Build (Next static export)
-    run: npm run build
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-  - name: Install IPFS CLI
-    run: |
-      set -euo pipefail
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
 
-      # Зафиксируйте версию (��ри необходимости поменяйте)
-      IPFS_VERSION=${IPFS_VERSION:-v0.30.0}
+      - name: Install deps
+        run: npm ci
 
-      # Определяем архитектуру runner'а
-      arch=$(uname -m)
-      case "$arch" in
-        x86_64) ARCH="linux-amd64" ;;
-        aarch64|arm64) ARCH="linux-arm64" ;;
-        *) echo "Unsupported architecture: $arch"; exit 1 ;;
-      esac
+      - name: Build (Next static export)
+        run: npm run build
 
-      FNAME="go-ipfs_${IPFS_VERSION#v}_${ARCH}.tar.gz"
-      URL="https://dist.ipfs.io/go-ipfs/${IPFS_VERSION}/${FNAME}"
+      - name: Install IPFS CLI
+        run: |
+          set -euo pipefail
 
-      echo "Downloading $URL"
-      # -f чтобы падать при HTTP ошибках, -S показать ошибки, -L следовать редиректам
-      curl -fSL "$URL" -o "/tmp/$FNAME"
+          # Зафиксируйте версию (при необходимости поменяйте)
+          IPFS_VERSION=${IPFS_VERSION:-v0.30.0}
 
-      echo "Verifying tarball"
-      # tar -tzf выйдет с ошибкой, если файл не валидный gzip tar
-      tar -tzf "/tmp/$FNAME" > /dev/null
+          # Определяем архитектуру runner'а
+          arch=$(uname -m)
+          case "$arch" in
+            x86_64) ARCH="linux-amd64" ;;
+            aarch64|arm64) ARCH="linux-arm64" ;;
+            *) echo "Unsupported architecture: $arch"; exit 1 ;;
+          esac
 
-      echo "Extracting and installing ipfs"
-      tar -xzf "/tmp/$FNAME" -C /tmp
-      sudo mv /tmp/go-ipfs/*/ipfs /usr/local/bin/
-      ipfs --version
+          FNAME="go-ipfs_${IPFS_VERSION#v}_${ARCH}.tar.gz"
+          URL="https://dist.ipfs.io/go-ipfs/${IPFS_VERSION}/${FNAME}"
 
-  - name: Upload to Filebase IPFS
-    id: ipfs
-    env:
-      FILEBASE_RPC_KEY: ${{ secrets.FILEBASE_RPC_KEY }}
-    run: |
-      CID=$(ipfs \
-        --api="/dns4/rpc.filebase.io/tcp/443/https" \
-        --api-auth="$FILEBASE_RPC_KEY" \
-        add -r -Q out)
-      echo "cid=$CID" >> $GITHUB_OUTPUT
-      echo "Deployed CID: $CID"
+          echo "Downloading $URL"
+          # -f чтобы падать при HTTP ошибках, -S показать ошибки, -L следовать редиректам
+          curl -fSL "$URL" -o "/tmp/$FNAME"
 
-  - name: Update IPNS
-    env:
-      FILEBASE_RPC_KEY: ${{ secrets.FILEBASE_RPC_KEY }}
-      IPNS_KEY: ${{ secrets.FILEBASE_IPNS_KEY }}
-    run: |
-      ipfs \
-        --api="/dns4/rpc.filebase.io/tcp/443/https" \
-        --api-auth="$FILEBASE_RPC_KEY" \
-        name publish --key=$IPNS_KEY /ipfs/${{ steps.ipfs.outputs.cid }}
+          echo "Verifying tarball"
+          # tar -tzf выйдет с ошибкой, если файл не валидный gzip tar
+          tar -tzf "/tmp/$FNAME" > /dev/null
+
+          echo "Extracting and installing ipfs"
+          tar -xzf "/tmp/$FNAME" -C /tmp
+          sudo mv /tmp/go-ipfs/*/ipfs /usr/local/bin/
+          ipfs --version
+
+      - name: Upload to Filebase IPFS
+        id: ipfs
+        env:
+          FILEBASE_RPC_KEY: ${{ secrets.FILEBASE_RPC_KEY }}
+        run: |
+          CID=$(ipfs \
+            --api="/dns4/rpc.filebase.io/tcp/443/https" \
+            --api-auth="$FILEBASE_RPC_KEY" \
+            add -r -Q out)
+          echo "cid=$CID" >> $GITHUB_OUTPUT
+          echo "Deployed CID: $CID"
+
+      - name: Update IPNS
+        env:
+          FILEBASE_RPC_KEY: ${{ secrets.FILEBASE_RPC_KEY }}
+          IPNS_KEY: ${{ secrets.FILEBASE_IPNS_KEY }}
+        run: |
+          ipfs \
+            --api="/dns4/rpc.filebase.io/tcp/443/https" \
+            --api-auth="$FILEBASE_RPC_KEY" \
+            name publish --key=$IPNS_KEY /ipfs/${{ steps.ipfs.outputs.cid }}
