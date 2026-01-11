@@ -28,10 +28,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Зафиксируйте версию (при необходимости)
           IPFS_VERSION=${IPFS_VERSION:-v0.30.0}
 
-          # Определяем архитектуру runner'а
           arch=$(uname -m)
           case "$arch" in
             x86_64) TAR_ARCH="linux-amd64" ;;
@@ -39,7 +37,6 @@ jobs:
             *) echo "Unsupported architecture: $arch"; exit 1 ;;
           esac
 
-          # Имя архива на dist.ipfs.io содержит "v" в версии
           FNAME="go-ipfs_${IPFS_VERSION}_${TAR_ARCH}.tar.gz"
           URL="https://dist.ipfs.io/go-ipfs/${IPFS_VERSION}/${FNAME}"
 
@@ -49,40 +46,100 @@ jobs:
           echo "Verifying tarball"
           tar -tzf "/tmp/$FNAME" > /dev/null
 
-          # Распаковываем в временную папку и ищем бинарник ipfs
           EXTRACT_DIR=$(mktemp -d)
           tar -xzf "/tmp/$FNAME" -C "$EXTRACT_DIR"
 
-          IPFS_BIN=$(find "$EXTRACT_DIR" -type f -name ipfs -executable -print -quit || true)
+          IPFS_BIN=$(find "$EXTRACT_DIR" -type f -name ipfs -perm /a+x -print -quit || true)
           if [ -z "$IPFS_BIN" ]; then
-            echo "ERROR: ipfs binary not found in archive. Список содержимого архива:"
+            echo "ERROR: ipfs binary not found in archive. Listing archive contents:"
             tar -tzf "/tmp/$FNAME"
             exit 1
           fi
 
           echo "Found ipfs binary at: $IPFS_BIN"
-          # Устанавливаем с правильными правами
           sudo install -m 0755 "$IPFS_BIN" /usr/local/bin/ipfs
           ipfs --version
 
-      - name: Upload to Filebase IPFS
+      - name: Upload to Filebase IPFS (try ipfs CLI, fallback to curl)
         id: ipfs
         env:
           FILEBASE_RPC_KEY: ${{ secrets.FILEBASE_RPC_KEY }}
         run: |
-          CID=$(ipfs \
-            --api="/dns4/rpc.filebase.io/tcp/443/https" \
-            --api-auth="$FILEBASE_RPC_KEY" \
-            add -r -Q out)
-          echo "cid=$CID" >> $GITHUB_OUTPUT
-          echo "Deployed CID: $CID"
+          set -euo pipefail
+
+          API_ADDR="/dns4/rpc.filebase.io/tcp/443/https"
+
+          if [ -z "${FILEBASE_RPC_KEY:-}" ]; then
+            echo "ERROR: FILEBASE_RPC_KEY is not set in secrets"; exit 1
+          fi
+
+          echo "Attempting upload with ipfs CLI (Basic auth with empty password: key: )"
+          CID=""
+          # try ipfs CLI using key as username with empty password (most common for Filebase)
+          if CID=$(ipfs --api="$API_ADDR" --api-auth="${FILEBASE_RPC_KEY}:" add -r -Q out 2>&1); then
+            echo "Uploaded via ipfs CLI: $CID"
+            echo "cid=$CID" >> $GITHUB_OUTPUT
+            exit 0
+          else
+            echo "ipfs CLI upload failed, will try HTTP API via curl. ipfs output:"
+            echo "$CID"
+          fi
+
+          echo "Trying upload via curl to RPC HTTP API (will send all files under out/)..."
+          TMPDIR=$(mktemp -d)
+          # Build curl args with multiple -F file=@...;filename=relative/path to preserve directory structure
+          ARGS=()
+          while IFS= read -r -d '' file; do
+            rel=${file#out/}
+            ARGS+=( -F "file=@${file};filename=${rel}" )
+          done < <(find out -type f -print0)
+
+          if [ ${#ARGS[@]} -eq 0 ]; then
+            echo "ERROR: nothing found in out/ to upload"; exit 1
+          fi
+
+          # perform curl; use -u "KEY:" for Basic auth with empty password
+          set +e
+          RESP=$(curl -sS -u "${FILEBASE_RPC_KEY}:" "${ARGS[@]}" "https://rpc.filebase.io/api/v0/add?pin=true&wrap-with-directory=true" 2>&1)
+          CSTATUS=$?
+          set -e
+
+          echo "curl exit status: $CSTATUS"
+          echo "curl response (truncated to 1000 chars):"
+          echo "$RESP" | sed -n '1,100p'
+
+          if [ $CSTATUS -ne 0 ]; then
+            echo "ERROR: curl failed to contact RPC API. Full response:"
+            echo "$RESP"
+            exit 1
+          fi
+
+          # The API returns multiple JSON objects (one per added item). The last object is the directory hash.
+          # Extract last JSON object's Hash field
+          LAST_HASH=$(echo "$RESP" | awk -F'"' '/"Hash"/ {hash=$4} END {print hash}')
+          if [ -z "$LAST_HASH" ]; then
+            echo "ERROR: could not parse Hash from response. Full response:"
+            echo "$RESP"
+            exit 1
+          fi
+
+          echo "Uploaded via curl, CID: $LAST_HASH"
+          echo "cid=$LAST_HASH" >> $GITHUB_OUTPUT
 
       - name: Update IPNS
         env:
           FILEBASE_RPC_KEY: ${{ secrets.FILEBASE_RPC_KEY }}
           IPNS_KEY: ${{ secrets.FILEBASE_IPNS_KEY }}
         run: |
-          ipfs \
-            --api="/dns4/rpc.filebase.io/tcp/443/https" \
-            --api-auth="$FILEBASE_RPC_KEY" \
-            name publish --key=$IPNS_KEY /ipfs/${{ steps.ipfs.outputs.cid }}
+          set -euo pipefail
+
+          if [ -z "${FILEBASE_RPC_KEY:-}" ]; then
+            echo "ERROR: FILEBASE_RPC_KEY is not set"; exit 1
+          fi
+          if [ -z "${IPNS_KEY:-}" ]; then
+            echo "ERROR: FILEBASE_IPNS_KEY is not set"; exit 1
+          fi
+
+          API_ADDR="/dns4/rpc.filebase.io/tcp/443/https"
+          # publish using ipfs CLI
+          ipfs --api="$API_ADDR" --api-auth="${FILEBASE_RPC_KEY}:" name publish --key="$IPNS_KEY" /ipfs/${{ steps.ipfs.outputs.cid }}
