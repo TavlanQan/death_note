@@ -31,23 +31,23 @@ jobs:
           # Зафиксируйте версию (при необходимости поменяйте)
           IPFS_VERSION=${IPFS_VERSION:-v0.30.0}
 
-          # Определяем архитектуру runner'а
+          # Определяем архитектуру runner'а и соответствующее имя в архиве
           arch=$(uname -m)
           case "$arch" in
-            x86_64) ARCH="linux-amd64" ;;
-            aarch64|arm64) ARCH="linux-arm64" ;;
+            x86_64) TAR_ARCH="linux-amd64" ;;
+            aarch64|arm64) TAR_ARCH="linux-arm64" ;;
             *) echo "Unsupported architecture: $arch"; exit 1 ;;
           esac
 
-          FNAME="go-ipfs_${IPFS_VERSION#v}_${ARCH}.tar.gz"
+          # На dist.ipfs.io имя файла содержит букву "v" в версии:
+          # go-ipfs_v0.30.0_linux-amd64.tar.gz
+          FNAME="go-ipfs_${IPFS_VERSION}_${TAR_ARCH}.tar.gz"
           URL="https://dist.ipfs.io/go-ipfs/${IPFS_VERSION}/${FNAME}"
 
           echo "Downloading $URL"
-          # -f чтобы падать при HTTP ошибках, -S показать ошибки, -L следовать редиректам
           curl -fSL "$URL" -o "/tmp/$FNAME"
 
           echo "Verifying tarball"
-          # tar -tzf выйдет с ошибкой, если файл не валидный gzip tar
           tar -tzf "/tmp/$FNAME" > /dev/null
 
           echo "Extracting and installing ipfs"
