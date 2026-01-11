@@ -31,7 +31,7 @@ jobs:
           # Зафиксируйте версию (при необходимости поменяйте)
           IPFS_VERSION=${IPFS_VERSION:-v0.30.0}
 
-          # Определяем архитектуру runner'а и соответствующее имя в архиве
+          # Определяем архитектуру runner'а
           arch=$(uname -m)
           case "$arch" in
             x86_64) TAR_ARCH="linux-amd64" ;;
@@ -39,8 +39,7 @@ jobs:
             *) echo "Unsupported architecture: $arch"; exit 1 ;;
           esac
 
-          # На dist.ipfs.io имя файла содержит букву "v" в версии:
-          # go-ipfs_v0.30.0_linux-amd64.tar.gz
+          # Имя архива на dist.ipfs.io содержит "v" в версии
           FNAME="go-ipfs_${IPFS_VERSION}_${TAR_ARCH}.tar.gz"
           URL="https://dist.ipfs.io/go-ipfs/${IPFS_VERSION}/${FNAME}"
 
@@ -50,9 +49,20 @@ jobs:
           echo "Verifying tarball"
           tar -tzf "/tmp/$FNAME" > /dev/null
 
-          echo "Extracting and installing ipfs"
-          tar -xzf "/tmp/$FNAME" -C /tmp
-          sudo mv /tmp/go-ipfs/*/ipfs /usr/local/bin/
+          # Распаковываем в временную папку и ищем бинарник ipfs
+          EXTRACT_DIR=$(mktemp -d)
+          tar -xzf "/tmp/$FNAME" -C "$EXTRACT_DIR"
+
+          IPFS_BIN=$(find "$EXTRACT_DIR" -type f -name ipfs -executable -print -quit || true)
+          if [ -z "$IPFS_BIN" ]; then
+            echo "ERROR: ipfs binary not found in archive. Список содержимого архива:"
+            tar -tzf "/tmp/$FNAME"
+            exit 1
+          fi
+
+          echo "Found ipfs binary at: $IPFS_BIN"
+          # Устанавливаем с правильными правами
+          sudo install -m 0755 "$IPFS_BIN" /usr/local/bin/ipfs
           ipfs --version
 
       - name: Upload to Filebase IPFS
