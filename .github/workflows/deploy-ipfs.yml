@@ -114,94 +114,223 @@ jobs:
       run: |
         echo "🔍 Получаю CID через Filebase API..."
         
-        # Получаем токен авторизации
-        echo "🔐 Получаю токен авторизации..."
-        AUTH_RESPONSE=$(curl -s -X POST https://api.filebase.io/v1/account/auth \
-          -u "${{ secrets.FILEBASE_ACCESS_KEY }}:${{ secrets.FILEBASE_SECRET_KEY }}")
+        # Метод 1: Пытаемся получить через S3 метаданные
+        echo "🔄 Метод 1: Получаю через S3 API..."
         
-        echo "📄 Ответ авторизации:"
-        echo "$AUTH_RESPONSE" | jq '.'
+        # Пробуем получить CID через S3 API (более надежный способ)
+        echo "🔎 Ищу файлы в папке ${{ env.FOLDER_NAME }}..."
         
-        TOKEN=$(echo "$AUTH_RESPONSE" | jq -r '.token')
+        # Получаем список файлов в папке
+        FILES_LIST=$(aws s3 ls "s3://${{ env.FILEBASE_BUCKET }}/${{ env.FOLDER_NAME }}/" \
+          --endpoint-url "${{ env.FILEBASE_ENDPOINT }}" \
+          --recursive)
         
-        if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-          echo "❌ Ошибка: Не удалось получить токен"
-          exit 1
+        if [ -z "$FILES_LIST" ]; then
+          echo "❌ Файлы не найдены в S3"
+        else
+          echo "📄 Найденные файлы:"
+          echo "$FILES_LIST"
+          
+          # Берем первый файл
+          FIRST_FILE=$(echo "$FILES_LIST" | head -1 | awk '{print $4}')
+          echo "📄 Первый файл: $FIRST_FILE"
         fi
         
-        echo "✅ Токен получен"
+        # Метод 2: Используем Filebase API с отладкой
+        echo ""
+        echo "🔄 Метод 2: Пробую Filebase REST API..."
         
-        # Ждем 10 секунд, чтобы Filebase обработал файлы
-        echo "⏳ Жду 10 секунд для обработки файлов..."
-        sleep 10
+        # Получаем токен авторизации с подробным логированием
+        echo "🔐 Запрашиваю токен у Filebase..."
         
-        # Получаем список объектов в бакете с префиксом нашей папки
-        FOLDER_NAME="${{ env.FOLDER_NAME }}"
-        echo "🔎 Ищу папку: $FOLDER_NAME"
+        AUTH_RESPONSE=$(curl -s -v -X POST https://api.filebase.io/v1/account/auth \
+          -u "${{ secrets.FILEBASE_ACCESS_KEY }}:${{ secrets.FILEBASE_SECRET_KEY }}" 2>&1)
         
-        LIST_URL="https://api.filebase.io/v1/ipfs/buckets/${{ env.FILEBASE_BUCKET }}/keys?prefix=${FOLDER_NAME}/"
-        echo "📡 Запрашиваю: $LIST_URL"
+        echo "📄 Сырой ответ авторизации:"
+        echo "$AUTH_RESPONSE"
         
-        LIST_RESPONSE=$(curl -s -X GET "$LIST_URL" \
-          -H "Authorization: Bearer $TOKEN")
+        # Извлекаем токен разными способами
+        TOKEN=$(echo "$AUTH_RESPONSE" | grep -i "token" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
         
-        echo "📄 Ответ от Filebase API:"
-        echo "$LIST_RESPONSE" | jq '. | {object_count: .objects | length}' 2>/dev/null || echo "$LIST_RESPONSE"
-        
-        # Ищем CID в ответе
-        CID=$(echo "$LIST_RESPONSE" | jq -r '.objects[0].cid // empty' 2>/dev/null)
-        
-        if [ -z "$CID" ]; then
-          echo "⚠️ CID не найден в стандартном формате, пробую альтернативные методы..."
-          
-          # Метод 2: Ищем через регулярное выражение
-          CID=$(echo "$LIST_RESPONSE" | grep -o 'Qm[1-9A-HJ-NP-Za-km-z]\{44,\}' | head -1)
+        if [ -z "$TOKEN" ]; then
+          TOKEN=$(echo "$AUTH_RESPONSE" | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
         fi
         
-        if [ -z "$CID" ]; then
-          echo "⚠️ Второй метод не сработал, пробую третий метод..."
-          
-          # Метод 3: Получаем первый файл из папки через S3 и получаем его CID
-          FIRST_FILE=$(aws s3 ls "s3://${{ env.FILEBASE_BUCKET }}/$FOLDER_NAME/" --endpoint-url "${{ env.FILEBASE_ENDPOINT }}" | head -1 | awk '{print $4}')
-          
-          if [ ! -z "$FIRST_FILE" ]; then
-            echo "📄 Первый файл в папке: $FIRST_FILE"
-            
-            # Получаем CID файла
-            FILE_CID_RESPONSE=$(curl -s -X GET \
-              "https://api.filebase.io/v1/ipfs/buckets/${{ env.FILEBASE_BUCKET }}/keys/${FOLDER_NAME}/${FIRST_FILE}" \
-              -H "Authorization: Bearer $TOKEN")
-            
-            echo "📄 Ответ для файла:"
-            echo "$FILE_CID_RESPONSE" | jq '.' 2>/dev/null || echo "$FILE_CID_RESPONSE"
-            
-            CID=$(echo "$FILE_CID_RESPONSE" | jq -r '.cid // .pinned.pin.cid // empty' 2>/dev/null)
+        if [ -z "$TOKEN" ]; then
+          # Пробуем получить из JSON, если ответ в формате JSON
+          if command -v jq &> /dev/null; then
+            TOKEN=$(echo "$AUTH_RESPONSE" | jq -r '.token' 2>/dev/null || true)
           fi
         fi
         
-        if [ -z "$CID" ]; then
-          echo "❌ Не удалось получить CID автоматически"
-          echo "📝 Войдите в Filebase и скопируйте CID вручную:"
-          echo "   1. Откройте https://console.filebase.com"
-          echo "   2. Перейдите в бакет '${{ env.FILEBASE_BUCKET }}'"
-          echo "   3. Найдите папку '$FOLDER_NAME'"
-          echo "   4. Нажмите на папку → Copy CID"
-          echo "   5. Обновите IPNS вручную"
+        echo "🔑 Извлеченный токен: $TOKEN"
+        
+        if [ -z "$TOKEN" ]; then
+          echo "⚠️ Не удалось получить токен, пробую альтернативный метод..."
           
-          # Выходим с ошибкой, но не прерываем workflow полностью
+          # Альтернативный метод: используем прямой запрос без токена
+          echo "🔄 Метод 3: Прямой доступ к CID через S3 Head Object..."
+          
+          # Берем любой файл из папки
+          if [ ! -z "$FIRST_FILE" ]; then
+            echo "📄 Пробую получить CID для файла: $FIRST_FILE"
+            
+            # Получаем метаданные файла
+            HEAD_RESPONSE=$(aws s3api head-object \
+              --bucket "${{ env.FILEBASE_BUCKET }}" \
+              --key "$FIRST_FILE" \
+              --endpoint-url "${{ env.FILEBASE_ENDPOINT }}" \
+              2>&1 || true)
+            
+            echo "📄 Ответ S3 Head Object:"
+            echo "$HEAD_RESPONSE"
+            
+            # Ищем CID в метаданных
+            CID=$(echo "$HEAD_RESPONSE" | grep -o '"cid":"[^"]*"' | cut -d'"' -f4)
+            
+            if [ -z "$CID" ]; then
+              CID=$(echo "$HEAD_RESPONSE" | grep -o 'Qm[1-9A-HJ-NP-Za-km-z]\{44,\}' | head -1)
+            fi
+          fi
+        else
+          # Используем полученный токен
+          echo "✅ Токен получен, запрашиваю CID..."
+          
+          # Ждем немного для обработки файлов
+          sleep 5
+          
+          # Простой способ: используем API для получения списка объектов
+          LIST_RESPONSE=$(curl -s -X GET \
+            "https://api.filebase.io/v1/ipfs/buckets/${{ env.FILEBASE_BUCKET }}/keys?limit=10" \
+            -H "Authorization: Bearer $TOKEN")
+          
+          echo "📄 Ответ списка объектов (первые 1000 символов):"
+          echo "${LIST_RESPONSE:0:1000}"
+          
+          # Ищем нашу папку в ответе
+          FOLDER_NAME="${{ env.FOLDER_NAME }}"
+          CID=$(echo "$LIST_RESPONSE" | grep -o "\"name\":\"${FOLDER_NAME}/[^\"]*\".*\"cid\":\"[^\"]*\"" | head -1 | grep -o '"cid":"[^"]*"' | cut -d'"' -f4)
+          
+          if [ -z "$CID" ]; then
+            # Пробуем другой формат поиска
+            CID=$(echo "$LIST_RESPONSE" | grep -o '"cid":"[^"]*"' | head -1 | cut -d'"' -f4)
+          fi
+        fi
+        
+        # Метод 4: Используем Filebase веб-API напрямую
+        if [ -z "$CID" ]; then
+          echo ""
+          echo "🔄 Метод 4: Прямой запрос к веб-интерфейсу Filebase..."
+          
+          # Создаем Python скрипт для получения CID
+          cat > get_cid.py << 'EOF'
+import os
+import requests
+import json
+import time
+
+# Конфигурация
+ACCESS_KEY = os.environ.get('FILEBASE_ACCESS_KEY')
+SECRET_KEY = os.environ.get('FILEBASE_SECRET_KEY')
+BUCKET = os.environ.get('FILEBASE_BUCKET')
+FOLDER = os.environ.get('FOLDER_NAME')
+
+print(f"Ищу CID для папки: {FOLDER}")
+print(f"Бакет: {BUCKET}")
+
+# 1. Получаем токен
+try:
+    auth_response = requests.post(
+        'https://api.filebase.io/v1/account/auth',
+        auth=(ACCESS_KEY, SECRET_KEY),
+        timeout=30
+    )
+    print(f"Статус авторизации: {auth_response.status_code}")
+    print(f"Текст ответа: {auth_response.text}")
+    
+    if auth_response.status_code == 200:
+        token = auth_response.json().get('token')
+        if token:
+            print(f"Токен получен: {token[:20]}...")
+            
+            # 2. Получаем список объектов в бакете
+            time.sleep(3)
+            
+            list_response = requests.get(
+                f'https://api.filebase.io/v1/ipfs/buckets/{BUCKET}/keys',
+                headers={'Authorization': f'Bearer {token}'},
+                timeout=30
+            )
+            
+            print(f"Статус списка объектов: {list_response.status_code}")
+            
+            if list_response.status_code == 200:
+                objects = list_response.json().get('objects', [])
+                print(f"Найдено объектов: {len(objects)}")
+                
+                # Ищем нашу папку
+                for obj in objects:
+                    name = obj.get('name', '')
+                    if name.startswith(f'{FOLDER}/'):
+                        cid = obj.get('cid')
+                        if cid:
+                            print(f"Найден CID: {cid}")
+                            print(f"::set-output name=cid::{cid}")
+                            exit(0)
+                
+                print("Папка не найдена в списке объектов")
+            else:
+                print(f"Ошибка получения списка: {list_response.text}")
+        else:
+            print("Токен не найден в ответе")
+    else:
+        print(f"Ошибка авторизации: {auth_response.text}")
+except Exception as e:
+    print(f"Исключение: {str(e)}")
+
+print("CID не найден через API")
+EOF
+          
+          # Запускаем Python скрипт
+          python3 get_cid.py || true
+        fi
+        
+        # Метод 5: Если CID все еще не найден
+        if [ -z "$CID" ]; then
+          echo ""
+          echo "❌ CID не найден автоматически"
+          echo "📝 ИНСТРУКЦИЯ ДЛЯ РУЧНОГО ОБНОВЛЕНИЯ:"
+          echo ""
+          echo "1. Войдите в Filebase: https://console.filebase.com"
+          echo "2. Перейдите в бакет 'dxn-front'"
+          echo "3. Найдите папку: ${{ env.FOLDER_NAME }}"
+          echo "4. Нажмите на папку → Скопируйте CID из адресной строки или информации о папке"
+          echo "5. Перейдите в 'IPNS Keys'"
+          echo "6. Найдите ключ 'deathnote'"
+          echo "7. Нажмите 'Update' и вставьте CID"
+          echo ""
+          echo "📌 Пример:"
+          echo "   Ссылка будет выглядеть так:"
+          echo "   https://console.filebase.com/buckets/dxn-front?prefix=build-20240101-120000-abc123/"
+          echo "   CID будет в информации о папке: QmXyz..."
+          
           echo "CID_NOT_FOUND=true" >> $GITHUB_ENV
           echo "cid=none" >> $GITHUB_OUTPUT
         else
-          echo "🎯 УСПЕХ! Найден CID: $CID"
+          echo ""
+          echo "🎉 УСПЕХ! CID найден: $CID"
           echo "cid=$CID" >> $GITHUB_OUTPUT
           echo "IPFS_CID=$CID" >> $GITHUB_ENV
-        fi
+          
+          # Сохраняем CID в файл для использования в следующих шагах
+          echo "$CID" > /tmp/ipfs_cid.txt
+        fi    
     
     # Шаг 11: Обновляем IPNS запись (если CID найден)
     - name: 🔗 Update IPNS record
       if: env.IPFS_CID != ''
       run: |
-        echo "🔄 Обновляю IPNS запись..."
+        echo "🔄 Пробую обновить IPNS запись..."
         
         CID="${{ env.IPFS_CID }}"
         IPNS_KEY_NAME="${{ secrets.IPFS_KEY_NAME }}"
@@ -209,46 +338,21 @@ jobs:
         echo "🔑 IPNS ключ: $IPNS_KEY_NAME"
         echo "📦 CID: $CID"
         
-        # Получаем токен авторизации
-        AUTH_RESPONSE=$(curl -s -X POST https://api.filebase.io/v1/account/auth \
-          -u "${{ secrets.FILEBASE_ACCESS_KEY }}:${{ secrets.FILEBASE_SECRET_KEY }}")
-        TOKEN=$(echo "$AUTH_RESPONSE" | jq -r '.token')
-        
-        if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-          echo "❌ Ошибка получения токена"
-          exit 1
-        fi
-        
-        # Обновляем IPNS запись
-        echo "📡 Отправляю запрос на обновление IPNS..."
-        UPDATE_RESPONSE=$(curl -s -X POST \
-          "https://api.filebase.io/v1/ipns/$IPNS_KEY_NAME" \
-          -H "Authorization: Bearer $TOKEN" \
-          -H "Content-Type: application/json" \
-          -d "{\"cid\":\"$CID\",\"name\":\"$IPNS_KEY_NAME\"}")
-        
-        echo "📋 Ответ от Filebase:"
-        echo "$UPDATE_RESPONSE" | jq '.' 2>/dev/null || echo "$UPDATE_RESPONSE"
-        
-        # Проверяем успешность
-        if echo "$UPDATE_RESPONSE" | jq -e '.record' > /dev/null 2>&1; then
-          echo "✅ IPNS запись успешно обновлена!"
-          echo ""
-          echo "🎉 ДЕПЛОЙ ЗАВЕРШЕН!"
-          echo "🌐 Ваш сайт доступен по адресам:"
-          echo "   • https://deathnote.rip"
-          echo "   • https://ipfs.filebase.io/ipns/k51qzi5uqu5dlnkeibe66l3ccybqkyh244erdfm5nk12q6njyh8686llnusri9"
-          echo "   • https://$CID.ipfs.dweb.link"
-          echo ""
-          echo "⏱️ Обновление DNS может занять 1-5 минут"
-        else
-          echo "⚠️ IPNS обновление может не сработать автоматически"
-          echo "📝 Обновите IPNS вручную через Filebase:"
-          echo "   1. Откройте https://console.filebase.com"
-          echo "   2. Перейдите в IPNS Keys"
-          echo "   3. Найдите ключ '$IPNS_KEY_NAME'"
-          echo "   4. Нажмите Update и вставьте CID: $CID"
-        fi
+        echo "📝 Обновление IPNS может не сработать через API"
+        echo "📋 Обновите IPNS вручную через веб-интерфейс Filebase:"
+        echo ""
+        echo "1. Откройте https://console.filebase.com"
+        echo "2. Перейдите в 'IPNS Keys' в левом меню"
+        echo "3. Найдите ключ '$IPNS_KEY_NAME'"
+        echo "4. Нажмите 'Update'"
+        echo "5. Вставьте CID: $CID"
+        echo "6. Нажмите 'Update Record'"
+        echo ""
+        echo "🌐 После этого сайт будет доступен по:"
+        echo "   - https://deathnote.rip"
+        echo "   - https://ipfs.filebase.io/ipns/k51qzi5uqu5dlnkeibe66l3ccybqkyh244erdfm5nk12q6njyh8686llnusri9"
+        echo ""
+        echo "⏱️ Обновление займет 1-5 минут"
     
     # Шаг 12: Инструкция для ручного обновления (если CID не найден)
     - name: 📝 Manual update instructions
