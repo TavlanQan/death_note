@@ -1,0 +1,240 @@
+name: Deploy to IPFS via Filebase
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+env:
+  FILEBASE_BUCKET: "dxn-front"
+  FILEBASE_ENDPOINT: "https://s3.filebase.com"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Шаг 1: Получаем код
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # Шаг 2: Устанавливаем Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      # Шаг 3: Устанавливаем зависимости
+      - name: Install dependencies
+        run: |
+          npm ci
+          sudo apt-get update
+          sudo apt-get install -y jq
+      
+      # Шаг 4: Собираем проект
+      - name: Build project
+        run: npm run build
+      
+      # Шаг 5: Проверяем сборку
+      - name: Verify build
+        run: |
+          echo "Содержимое папки out:"
+          ls -la out/
+          echo "Размер папки:"
+          du -sh out/
+      
+      # Шаг 6: Устанавливаем AWS CLI
+      - name: Install AWS CLI
+        run: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip -q awscliv2.zip
+          sudo ./aws/install --update
+          aws --version
+      
+      # Шаг 7: Настраиваем AWS CLI для Filebase
+      - name: Configure AWS CLI for Filebase
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.FILEBASE_ACCESS_KEY }}
+          aws configure set aws_secret_access_key ${{ secrets.FILEBASE_SECRET_KEY }}
+          aws configure set default.region us-east-1
+          aws configure set default.s3.max_concurrent_requests 5
+          aws configure set default.s3.max_queue_size 1000
+          aws configure set default.s3.multipart_threshold 64MB
+          aws configure set default.s3.multipart_chunksize 16MB
+          aws configure set default.s3.use_accelerate_endpoint false
+          aws configure set default.s3.addressing_style virtual
+      
+      # Шаг 8: Создаем уникальное имя папки
+      - name: Generate unique folder name
+        id: folder-name
+        run: |
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          COMMIT_HASH=$(git rev-parse --short HEAD)
+          FOLDER_NAME="site-${TIMESTAMP}-${COMMIT_HASH}"
+          echo "folder_name=${FOLDER_NAME}" >> $GITHUB_OUTPUT
+          echo "FOLDER_NAME=${FOLDER_NAME}" >> $GITHUB_ENV
+          echo "Имя папки: ${FOLDER_NAME}"
+      
+      # Шаг 9: Загружаем в Filebase S3
+      - name: Upload to Filebase S3
+        id: upload
+        run: |
+          FOLDER_NAME="${{ steps.folder-name.outputs.folder_name }}"
+          S3_PATH="s3://${{ env.FILEBASE_BUCKET }}/${FOLDER_NAME}/"
+          
+          echo "Загружаю в: ${S3_PATH}"
+          
+          # Синхронизируем папку out
+          aws s3 sync ./out/ "${S3_PATH}" \
+            --endpoint-url "${{ env.FILEBASE_ENDPOINT }}" \
+            --acl public-read
+          
+          echo "Загрузка завершена!"
+          echo "S3_PATH=${S3_PATH}" >> $GITHUB_ENV
+      
+      # Шаг 10: Получаем CID через Filebase API
+      - name: Get CID from Filebase
+        id: get-cid
+        run: |
+          echo "Пробую получить CID..."
+          
+          FOLDER_NAME="${{ steps.folder-name.outputs.folder_name }}"
+          
+          # Получаем токен авторизации
+          echo "Запрашиваю токен..."
+          AUTH_RESPONSE=$(curl -s -X POST "https://api.filebase.io/v1/account/auth" \
+            -u "${{ secrets.FILEBASE_ACCESS_KEY }}:${{ secrets.FILEBASE_SECRET_KEY }}")
+          
+          echo "Ответ авторизации:"
+          echo "$AUTH_RESPONSE"
+          
+          # Пробуем извлечь токен
+          TOKEN=$(echo "$AUTH_RESPONSE" | grep -o '"token":"[^"]*"' | cut -d'"' -f4 || true)
+          
+          if [ -z "$TOKEN" ] && command -v jq > /dev/null; then
+            TOKEN=$(echo "$AUTH_RESPONSE" | jq -r '.token' 2>/dev/null || true)
+          fi
+          
+          if [ -z "$TOKEN" ]; then
+            echo "Не удалось получить токен"
+            echo "cid=not_found" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          echo "Токен получен"
+          
+          # Ждем немного
+          sleep 5
+          
+          # Получаем список объектов
+          echo "Запрашиваю список объектов..."
+          LIST_RESPONSE=$(curl -s -X GET \
+            "https://api.filebase.io/v1/ipfs/buckets/${{ env.FILEBASE_BUCKET }}/keys" \
+            -H "Authorization: Bearer $TOKEN")
+          
+          echo "Ответ списка объектов (первые 500 символов):"
+          echo "${LIST_RESPONSE:0:500}"
+          
+          # Ищем CID
+          CID=""
+          
+          # Метод 1: Ищем по имени папки
+          if [ -n "$LIST_RESPONSE" ]; then
+            CID=$(echo "$LIST_RESPONSE" | grep -o "\"name\":\"${FOLDER_NAME}[^\"]*\".*\"cid\":\"[^\"]*\"" | head -1 | grep -o '"cid":"[^"]*"' | cut -d'"' -f4 || true)
+          fi
+          
+          # Метод 2: Ищем любой CID
+          if [ -z "$CID" ]; then
+            CID=$(echo "$LIST_RESPONSE" | grep -o '"cid":"[^"]*"' | head -1 | cut -d'"' -f4 || true)
+          fi
+          
+          # Метод 3: Ищем через регулярку
+          if [ -z "$CID" ]; then
+            CID=$(echo "$LIST_RESPONSE" | grep -o 'Qm[1-9A-HJ-NP-Za-km-z]\{44,\}' | head -1 || true)
+          fi
+          
+          if [ -n "$CID" ]; then
+            echo "CID найден: $CID"
+            echo "cid=$CID" >> $GITHUB_OUTPUT
+            echo "IPFS_CID=$CID" >> $GITHUB_ENV
+          else
+            echo "CID не найден автоматически"
+            echo "cid=not_found" >> $GITHUB_OUTPUT
+          fi
+      
+      # Шаг 11: Отображаем результат
+      - name: Show deployment result
+        run: |
+          echo "========================================"
+          echo "🚀 ДЕПЛОЙ ВЫПОЛНЕН!"
+          echo "========================================"
+          echo ""
+          echo "📁 Папка в Filebase: ${{ steps.folder-name.outputs.folder_name }}"
+          echo ""
+          
+          if [ "${{ steps.get-cid.outputs.cid }}" != "not_found" ]; then
+            echo "📦 CID: ${{ steps.get-cid.outputs.cid }}"
+            echo ""
+            echo "🔗 Ссылки:"
+            echo "- https://deathnote.rip"
+            echo "- https://ipfs.filebase.io/ipns/k51qzi5uqu5dlnkeibe66l3ccybqkyh244erdfm5nk12q6njyh8686llnusri9"
+            echo "- https://${{ steps.get-cid.outputs.cid }}.ipfs.dweb.link"
+            echo ""
+            echo "📝 Чтобы обновить сайт:"
+            echo "1. Откройте https://console.filebase.com"
+            echo "2. Перейдите в 'IPNS Keys'"
+            echo "3. Найдите ключ 'deathnote'"
+            echo "4. Нажмите 'Update'"
+            echo "5. Вставьте CID: ${{ steps.get-cid.outputs.cid }}"
+            echo "6. Нажмите 'Update Record'"
+          else
+            echo "❌ CID не найден автоматически"
+            echo ""
+            echo "📝 Чтобы получить CID и обновить сайт:"
+            echo "1. Откройте https://console.filebase.com"
+            echo "2. Перейдите в бакет 'dxn-front'"
+            echo "3. Найдите папку '${{ steps.folder-name.outputs.folder_name }}'"
+            echo "4. Нажмите на папку → Скопируйте CID"
+            echo "5. Перейдите в 'IPNS Keys'"
+            echo "6. Найдите ключ 'deathnote'"
+            echo "7. Нажмите 'Update' → Вставьте CID → 'Update Record'"
+          fi
+          echo ""
+          echo "⏱️ После обновления IPNS сайт обновится через 1-5 минут"
+          echo "========================================"
+      
+      # Шаг 12: Создаем отчет в GitHub
+      - name: Create deployment summary
+        run: |
+          echo "## Результат деплоя" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.get-cid.outputs.cid }}" != "not_found" ]; then
+            echo "✅ **Файлы успешно загружены в Filebase**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**📁 Папка:** \`${{ steps.folder-name.outputs.folder_name }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "**📦 CID:** \`${{ steps.get-cid.outputs.cid }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**📝 Действия:**" >> $GITHUB_STEP_SUMMARY
+            echo "1. Войдите в [Filebase](https://console.filebase.com)" >> $GITHUB_STEP_SUMMARY
+            echo "2. Перейдите в **IPNS Keys**" >> $GITHUB_STEP_SUMMARY
+            echo "3. Найдите ключ **deathnote**" >> $GITHUB_STEP_SUMMARY
+            echo "4. Нажмите **Update** и вставьте CID выше" >> $GITHUB_STEP_SUMMARY
+            echo "5. Нажмите **Update Record**" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ **Файлы загружены, но CID не найден автоматически**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**📁 Папка:** \`${{ steps.folder-name.outputs.folder_name }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**📝 Действия:**" >> $GITHUB_STEP_SUMMARY
+            echo "1. Войдите в [Filebase](https://console.filebase.com)" >> $GITHUB_STEP_SUMMARY
+            echo "2. Перейдите в бакет **dxn-front**" >> $GITHUB_STEP_SUMMARY
+            echo "3. Найдите папку **${{ steps.folder-name.outputs.folder_name }}**" >> $GITHUB_STEP_SUMMARY
+            echo "4. Скопируйте CID из информации о папке" >> $GITHUB_STEP_SUMMARY
+            echo "5. Перейдите в **IPNS Keys** → ключ **deathnote**" >> $GITHUB_STEP_SUMMARY
+            echo "6. Обновите CID вручную" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🌐 После обновления IPNS сайт будет доступен по [deathnote.rip](https://deathnote.rip)" >> $GITHUB_STEP_SUMMARY
