@@ -43,7 +43,7 @@ function Main() {
   const closeModal = () => setModalOpen(false);
 
   const handleVote = (id) => {
-    router.push(`/support`);
+    router.push(`/support/`);
   };
 
   const handleSearchChange = (key) => (event) => {

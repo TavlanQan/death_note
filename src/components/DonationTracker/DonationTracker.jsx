@@ -31,7 +31,7 @@ export default function DonationTracker({ initialGoal = 10000 }) {
       </div>
 
       <div className={styles.donation_button}>
-        <a href="/support">
+        <a href="/support/">
           <img role="donate" src="/DONATE.png" alt="Donate button" />
         </a>
       </div>

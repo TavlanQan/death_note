@@ -4,9 +4,33 @@ import styles from "./Main.module.css";
 
 function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
   const location = [card.country, card.city].filter(Boolean).join(", ") || "—";
-  const birthDate = card.birth_date || "—";
+  
+  const identity = card.identity_documents || " ";
+  const birthDate = card.birth_date || " ";
   const phone = card.phones?.[0] || "—";
-  const extraInfo = card.additional_info + (card.labels?.length ? card.labels.join(", ") : "");
+  const debts = {};
+
+  (card.debt_amount || []).forEach(({ currency, amount }) => {
+    if (!currency) return;
+    debts[currency] = (debts[currency] || 0) + Number(amount || 0);
+  });
+
+  const debtList = Object.entries(debts).map(
+    ([currency, amount]) => `${currency}: ${amount}`
+  );
+
+
+  const extraInfo = [
+    card.additional_info,
+    card.labels?.length ? card.labels.join(", ") : null,
+    card.special_marks,
+    card.criminal_organizations?.length
+      ? card.criminal_organizations.join(", ")
+      : null
+  ]
+    .filter(Boolean)
+    .join(", ");
+
   const photoSrc = card.photo_url || "/deathlist_photos/1.png";
   const statusText = card.status   || "—";
 
@@ -47,7 +71,7 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
               <span className={styles.icon}>
                 <img src="/icons/cake.svg" alt="" />
               </span>
-              {birthDate}
+              {birthDate} {identity}
             </li>
             <li>
               <span className={styles.icon}>
@@ -55,6 +79,36 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
               </span>
               {phone}
             </li>
+           {Array.isArray(card.court_decisions) && card.court_decisions.length > 0 && (
+            <>
+              {card.court_decisions.map((url, index) => (
+                <li  >
+                  <span className={styles.icon}>
+                    <img src="/icons/call.svg" alt="" />
+                  </span>
+
+                  <a href={url} target="_blank" rel="noopener noreferrer">
+                    Решение суда №{index + 1}
+                  </a>
+                </li>
+              ))}
+            </>
+          )}
+
+          {debtList.length  && (
+            <>
+              {debtList.map((depth, index) => (
+                <li >
+                  <span className={styles.icon}>
+                    <img src="/icons/call.svg" alt="" />
+                  </span>
+                  Задолженность: {depth}
+                </li>
+              ))}
+            </>
+          )}
+          
+
             <li>
               <span className={styles.icon}>
                 <img src="/icons/info.svg" alt="" />

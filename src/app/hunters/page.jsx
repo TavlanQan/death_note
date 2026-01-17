@@ -32,14 +32,14 @@ export default function HuntersPage() {
           </header>
           <section className={styles.section}>
             <div className={styles.inlineRow}>
-              <span className={styles.helperText}>Ссылка для обращения:</span>
+              <span className={styles.helperText}>Ссылка для канал Ассоциации Третейских Судов:</span>
               <a
                 className={styles.helperLink}
-                href="https://example.com/court"
+                href="https://t.me/court_aac_ru"
                 target="_blank"
                 rel="noreferrer"
               >
-                https://example.com/court
+                https://t.me/court_aac_ru
               </a>
             </div>
           </section>
