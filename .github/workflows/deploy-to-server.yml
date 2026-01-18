@@ -1,0 +1,46 @@
+name: 🚀 Deploy to Deathnote Server
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🚚 Получаем код
+      uses: actions/checkout@v3
+    
+    - name: 🔧 Настраиваем Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: 📦 Устанавливаем зависимости
+      run: npm ci
+    
+    - name: 🏗️ Собираем проект
+      run: npm run build
+      env:
+        NODE_ENV: production
+    
+    - name: 📤 Деплоим на сервер
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        port: 22
+        script: |
+          cd /var/www/deathnote/death_note
+          git pull origin main
+          npm install --production
+          npm run build
+          chown -R root:www-data /var/www/deathnote/death_note
+          chmod -R 775 /var/www/deathnote/death_note
+          echo "✅ Деплой из GitHub Actions завершен: $(date)" >> /var/log/deploy.log
+    
+    - name: ✅ Готово
+      run: echo "🎉 Деплой завершен!"
