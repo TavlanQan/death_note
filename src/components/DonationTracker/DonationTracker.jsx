@@ -3,7 +3,7 @@
 import { DONATION_CURRENT, DONATION_GOAL } from "@/constants/donation";
 import styles from "./Donation.module.css";
 
-export default function DonationTracker({ initialGoal = 10000 }) {
+export default function DonationTracker({ initialGoal = 12000 }) {
   const goalAmount = initialGoal ?? DONATION_GOAL;
   const donationAmount = Math.min(DONATION_CURRENT, goalAmount);
 
@@ -12,6 +12,8 @@ export default function DonationTracker({ initialGoal = 10000 }) {
 
   return (
     <section role="donation-information" className={styles.donation_section}>
+      
+     
       <div className={styles.donation_field}>
         <div className={styles.donation_fill_block} />
         <div
@@ -27,9 +29,9 @@ export default function DonationTracker({ initialGoal = 10000 }) {
       </div>
 
       <div className={styles.donation_count}>
-        ${donationAmount} of {goalAmount}
+       Goal {goalAmount}$
       </div>
-
+     
       <div className={styles.donation_button}>
         <a href="/support/">
           <img role="donate" src="/DONATE.png" alt="Donate button" />
