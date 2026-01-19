@@ -7,7 +7,6 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
   
   const identity = card.identity_documents || " ";
   const birthDate = card.birth_date || " ";
-  const phone = card.phones?.[0] || "—";
   const debts = {};
 
   (card.debt_amount || []).forEach(({ currency, amount }) => {
@@ -16,7 +15,7 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
   });
 
   const debtList = Object.entries(debts).map(
-    ([currency, amount]) => `${currency}: ${amount}`
+    ([currency, amount]) => `${amount} ${currency}`
   );
 
 
@@ -73,18 +72,21 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
               </span>
               {birthDate} {identity}
             </li>
-            <li>
-              <span className={styles.icon}>
-                <img src="/icons/call.svg" alt="" />
-              </span>
-              {phone}
-            </li>
+            {Array.isArray(card.phones) && card.phones.length > 0 && (
+              <li>
+                <span className={styles.icon}>
+                  <img src="/icons/call.svg" alt="" />
+                </span>
+                {card.phones.join(", ")}
+              </li>
+            )}
+
            {Array.isArray(card.court_decisions) && card.court_decisions.length > 0 && (
             <>
               {card.court_decisions.map((url, index) => (
                 <li  >
                   <span className={styles.icon}>
-                    <img src="/icons/call.svg" alt="" />
+                    <img src="/icons/cake.svg" alt="" />
                   </span>
 
                   <a href={url} target="_blank" rel="noopener noreferrer">
@@ -100,7 +102,7 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
               {debtList.map((depth, index) => (
                 <li >
                   <span className={styles.icon}>
-                    <img src="/icons/call.svg" alt="" />
+                    <img src="/icons/info.svg" alt="" />
                   </span>
                   Задолженность: {depth}
                 </li>
