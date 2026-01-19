@@ -3,10 +3,16 @@ import React from "react";
 import styles from "./Main.module.css";
 
 function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
-  const location = [card.country, card.city].filter(Boolean).join(", ") || "—";
   
-  const identity = card.identity_documents || " ";
-  const birthDate = card.birth_date || " ";
+  //фильтр на вид преступления, и статус вне закона. отображать только такие карточки
+  if (card.status !== "outlaw" || 
+    ( !card.labels?.includes("kidnapper") && !card.labels?.includes("murderer")  && !card.labels?.includes("rapist"))
+  ) {
+    return ''; // Не рендерить карточку, если статус не "Вне закона"
+  }
+  
+  const location = [card.country, card.city].filter(Boolean).join(", ") || "—";
+   
   const debts = {};
 
   (card.debt_amount || []).forEach(({ currency, amount }) => {
@@ -66,14 +72,14 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
               </span>
               {location}
             </li>
-            {birthDate || identity ? (
+            {card.birth_date || card.identity_documents ? (
               <li>
                 <span className={styles.icon}>
                   <img src="/icons/cake.svg" alt="" />
                 </span>
-                {birthDate} {identity}
+                {card.birth_date} {card.identity_documents}
               </li>
-            ) : null}          
+            ) : ' '}          
             {Array.isArray(card.phones) && card.phones.length > 0 && (
               <li>
                 <span className={styles.icon}>
