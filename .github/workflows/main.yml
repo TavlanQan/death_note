@@ -3,6 +3,8 @@ name: 🚀 Deploy to Deathnote Server
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -26,25 +28,21 @@ jobs:
       env:
         NODE_ENV: production
     
-    - name: 🛠️ Настраиваем SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
-        chmod 600 ~/.ssh/id_ed25519
-        ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
-        echo "SSH ключ настроен"
-    
-    - name: 📤 Подключаемся и деплоим
-      run: |
-        ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+    - name: 📤 Деплоим на сервер
+      uses: appleboy/ssh-action@v0.1.5
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        port: 22
+        script: |
           cd /var/www/deathnote/death_note
           git pull origin main
           npm install --production
           npm run build
           chown -R root:www-data /var/www/deathnote/death_note
           chmod -R 775 /var/www/deathnote/death_note
-          echo '✅ Деплой из GitHub Actions завершен: $(date)' >> /var/log/deploy.log
-        "
+          echo "✅ Деплой из GitHub Actions завершен: $(date)" >> /var/log/deploy.log
     
     - name: ✅ Готово
       run: echo "🎉 Деплой завершен!"
