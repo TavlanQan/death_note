@@ -6,7 +6,7 @@ import styles from "@/styles/StaticPage.module.css";
 
 export const dynamicParams = false;
 
-cards=[];
+const cards=[];
 
 export function generateStaticParams() {
   return cards
