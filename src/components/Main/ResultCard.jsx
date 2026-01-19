@@ -15,7 +15,7 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
   });
 
   const debtList = Object.entries(debts).map(
-    ([currency, amount]) => `${amount} ${currency}`
+    ([currency, amount]) => Intl.NumberFormat("ru-RU").format(amount) + ` ${currency}`
   );
 
 
@@ -66,12 +66,14 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
               </span>
               {location}
             </li>
-            <li>
-              <span className={styles.icon}>
-                <img src="/icons/cake.svg" alt="" />
-              </span>
-              {birthDate} {identity}
-            </li>
+            {birthDate || identity ? (
+              <li>
+                <span className={styles.icon}>
+                  <img src="/icons/cake.svg" alt="" />
+                </span>
+                {birthDate} {identity}
+              </li>
+            ) : null}          
             {Array.isArray(card.phones) && card.phones.length > 0 && (
               <li>
                 <span className={styles.icon}>
@@ -109,14 +111,16 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
               ))}
             </>
           )}
-          
 
+          {extraInfo && (
             <li>
               <span className={styles.icon}>
                 <img src="/icons/info.svg" alt="" />
               </span>
               {extraInfo}
             </li>
+          )}
+
           </ul>
         </div>
 
