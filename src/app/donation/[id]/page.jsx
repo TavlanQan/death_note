@@ -1,7 +1,6 @@
 import Header from "@/components/Header/Header";
 import DonationTracker from "@/components/DonationTracker/DonationTracker";
 import ResultCard from "@/components/Main/ResultCard";
-import cards from "@/../public/cards.json";
 import { notFound } from "next/navigation";
 import styles from "@/styles/StaticPage.module.css";
 
