@@ -21,7 +21,7 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
   });
 
   const debtList = Object.entries(debts).map(
-    ([currency, amount]) => Intl.NumberFormat("ru-RU").format(amount) + ` ${currency}`
+    ([currency, amount]) => Intl.NumberFormat("ru-RU").format(amount) + ' ' + (currency == 'BLC' ? '<a href="//t.me/chuvash_crypto" target="_blank" >BLC</a>' : currency)
   );
 
 
@@ -72,7 +72,7 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
               </span>
               {location}
             </li>
-            {card.birth_date || card.identity_documents ? (
+            {card.birth_date!==null || card.identity_documents!==null ? (
               <li>
                 <span className={styles.icon}>
                   <img src="/icons/cake.svg" alt="" />
