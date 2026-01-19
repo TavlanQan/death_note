@@ -20,9 +20,10 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
     debts[currency] = (debts[currency] || 0) + Number(amount || 0);
   });
 
-  const debtList = Object.entries(debts).map(
-    ([currency, amount]) => Intl.NumberFormat("ru-RU").format(amount) + ' ' + (currency == 'BLC' ? '<a href="//t.me/chuvash_crypto" target="_blank" >BLC</a>' : currency)
-  );
+const debtList = Object.entries(debts).map(([currency, amount]) => ({
+  currency,
+  amount: Intl.NumberFormat("ru-RU").format(amount),
+}));
 
 
   const extraInfo = [
@@ -105,18 +106,27 @@ function ResultCard({ card, onAppeal, onClaim, showVote = true, onVote }) {
             </>
           )}
 
-          {debtList.length  && (
-            <>
-              {debtList.map((depth, index) => (
-                <li >
-                  <span className={styles.icon}>
-                    <img src="/icons/info.svg" alt="" />
-                  </span>
-                  Задолженность: {depth}
-                </li>
-              ))}
-            </>
-          )}
+          {debtList.length > 0 &&
+            debtList.map(({ currency, amount }, index) => (
+              <li key={currency + index}>
+                <span className={styles.icon}>
+                  <img src="/icons/info.svg" alt="" />
+                </span>
+                Задолженность: {amount}{" "}
+                {currency === "BLC" ? (
+                  <a
+                    href="https://t.me/chuvash_crypto"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    BLC
+                  </a>
+                ) : (
+                  currency
+                )}
+              </li>
+            ))}
+
 
           {extraInfo && (
             <li>
