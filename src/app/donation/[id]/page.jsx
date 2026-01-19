@@ -1,10 +1,12 @@
 import Header from "@/components/Header/Header";
 import DonationTracker from "@/components/DonationTracker/DonationTracker";
-import ResultCard from "@/components/Main/ResultCard";
+import ResultCard from "@/components/Main/ResultCard"; 
 import { notFound } from "next/navigation";
 import styles from "@/styles/StaticPage.module.css";
 
 export const dynamicParams = false;
+
+cards=[];
 
 export function generateStaticParams() {
   return cards
